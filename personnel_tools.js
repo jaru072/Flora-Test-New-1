@@ -122,13 +122,38 @@
     body.innerHTML=state.view==='table'?tableMarkup(list):cardMarkup(list);updateBulk();updateAccessUi();
   };
 
-  function tableMarkup(list){return `<div class="personnel-table-wrap"><table class="table table-hover personnel-table"><thead><tr><th><input type="checkbox" onchange="toggleAllPersonnel(this.checked)"></th><th>รูป</th><th>รหัส</th><th>ชื่อ–นามสกุล</th><th>แผนก</th><th>ตำแหน่ง/รายละเอียด</th><th>โทรศัพท์</th><th class="text-center" style="min-width:180px">เครื่องมือ</th></tr></thead><tbody>${list.map(e=>{const id=empId(e),checked=state.selected.has(id);return `<tr class="${checked?'table-success':''}"><td><input type="checkbox" ${checked?'checked':''} onchange="togglePersonnelSelection('${esc(id)}',this.checked)"></td><td><img class="personnel-avatar" src="${esc(e.photoUrl||'')}" onerror="this.src='favicon.png'"></td><td><span class="badge text-bg-dark font-monospace">${esc(e.code||id)}</span></td><td><b>${esc(e.name||'-')}</b>${e.nickname?`<div class="text-muted small">ชื่อเล่น: ${esc(e.nickname)}</div>`:''}</td><td>${esc(strip(e.department||'-'))}</td><td><b>${esc(strip(e.position||'-'))}</b><div class="text-muted small text-truncate" style="max-width:240px">${esc(e.details||e.note||'')}</div></td><td>${esc(e.phone||'-')}</td><td><div class="personnel-table-actions"><button class="btn btn-outline-primary btn-sm rounded-pill personnel-admin-only" onclick="openEditModal('${esc(id)}')" title="แก้ไขข้อมูล"><i class="bi bi-pencil-square"></i></button><button class="btn btn-outline-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint(['${esc(id)}'])" title="พิมพ์บัตร"><i class="bi bi-person-badge"></i></button><button class="btn btn-outline-info btn-sm rounded-pill" onclick="openPersonnelHistory('${esc(id)}')" title="ประวัติการเบิกยืม"><i class="bi bi-clock-history"></i></button><button class="btn btn-outline-danger btn-sm rounded-pill personnel-admin-only" onclick="confirmDeleteEmployee('${esc(id)}','${esc(e.name||id)}')" title="ลบข้อมูล (ย้ายไปถังขยะ)"><i class="bi bi-trash3-fill"></i></button></div></td></tr>`}).join('')}</tbody></table></div>`}
+  function tableMarkup(list){
+    const selectedInView = list.filter(e => state.selected.has(empId(e))).length;
+    const isAll = list.length > 0 && selectedInView === list.length;
+    return `<div class="personnel-table-wrap"><table class="table table-hover personnel-table"><thead><tr><th style="width:40px"><input type="checkbox" id="personnelSelectAllHeader" class="form-check-input" ${isAll ? 'checked' : ''} onchange="toggleAllPersonnel(this.checked)" title="เลือกทั้งหมด / ยกเลิกทั้งหมด"></th><th>รูป</th><th>รหัส</th><th>ชื่อ–นามสกุล</th><th>แผนก</th><th>ตำแหน่ง/รายละเอียด</th><th>โทรศัพท์</th><th class="text-center" style="min-width:180px">เครื่องมือ</th></tr></thead><tbody>${list.map(e=>{const id=empId(e),checked=state.selected.has(id);return `<tr class="${checked?'table-success':''}"><td><input type="checkbox" class="form-check-input" ${checked?'checked':''} onchange="togglePersonnelSelection('${esc(id)}',this.checked)"></td><td><img class="personnel-avatar" src="${esc(e.photoUrl||'')}" onerror="this.src='favicon.png'"></td><td><span class="badge text-bg-dark font-monospace">${esc(e.code||id)}</span></td><td><b>${esc(e.name||'-')}</b>${e.nickname?`<div class="text-muted small">ชื่อเล่น: ${esc(e.nickname)}</div>`:''}</td><td>${esc(strip(e.department||'-'))}</td><td><b>${esc(strip(e.position||'-'))}</b><div class="text-muted small text-truncate" style="max-width:240px">${esc(e.details||e.note||'')}</div></td><td>${esc(e.phone||'-')}</td><td><div class="personnel-table-actions"><button class="btn btn-outline-primary btn-sm rounded-pill personnel-admin-only" onclick="openEditModal('${esc(id)}')" title="แก้ไขข้อมูล"><i class="bi bi-pencil-square"></i></button><button class="btn btn-outline-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint(['${esc(id)}'])" title="พิมพ์บัตร"><i class="bi bi-person-badge"></i></button><button class="btn btn-outline-info btn-sm rounded-pill" onclick="openPersonnelHistory('${esc(id)}')" title="ประวัติการเบิกยืม"><i class="bi bi-clock-history"></i></button><button class="btn btn-outline-danger btn-sm rounded-pill personnel-admin-only" onclick="confirmDeleteEmployee('${esc(id)}','${esc(e.name||id)}')" title="ลบข้อมูล (ย้ายไปถังขยะ)"><i class="bi bi-trash3-fill"></i></button></div></td></tr>`}).join('')}</tbody></table></div>`;
+  }
   function cardMarkup(list){return `<div class="personnel-card-grid">${list.map(e=>{const id=empId(e),checked=state.selected.has(id);return `<article class="personnel-directory-card ${checked?'selected':''}"><input class="form-check-input position-absolute top-0 start-0 m-2" type="checkbox" ${checked?'checked':''} onchange="togglePersonnelSelection('${esc(id)}',this.checked)"><div class="d-flex gap-3 align-items-center"><img class="personnel-avatar" src="${esc(e.photoUrl||'')}" onerror="this.src='favicon.png'"><div class="min-width-0"><span class="badge text-bg-dark font-monospace">${esc(e.code||id)}</span><h6 class="fw-bold mt-2 mb-1">${esc(e.name||'-')}</h6><small class="text-muted">${e.nickname?'ชื่อเล่น '+esc(e.nickname)+' · ':''}${esc(e.phone||'-')}</small></div></div><hr><div class="small"><b class="text-success">${esc(strip(e.department||'-'))}</b><div>${esc(strip(e.position||'-'))}</div><div class="text-muted text-truncate">${esc(e.details||e.note||'')}</div></div><div class="d-flex gap-1 mt-3 align-items-center"><button class="btn btn-outline-primary btn-sm rounded-pill flex-fill personnel-admin-only" onclick="openEditModal('${esc(id)}')">แก้ไข</button><button class="btn btn-outline-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint(['${esc(id)}'])" title="พิมพ์บัตร"><i class="bi bi-printer"></i></button><button class="btn btn-outline-info btn-sm rounded-pill" onclick="openPersonnelHistory('${esc(id)}')" title="ประวัติ"><i class="bi bi-clock-history"></i></button><button class="btn btn-outline-danger btn-sm rounded-pill personnel-admin-only" onclick="confirmDeleteEmployee('${esc(id)}','${esc(e.name||id)}')" title="ลบข้อมูล"><i class="bi bi-trash3-fill"></i></button></div></article>`}).join('')}</div>`}
 
   window.togglePersonnelSelection=(id,on)=>{on?state.selected.add(id):state.selected.delete(id);renderPersonnelDirectory()};
-  window.toggleAllPersonnel=on=>{filteredEmployees().forEach(e=>on?state.selected.add(empId(e)):state.selected.delete(empId(e)));renderPersonnelDirectory()};
+  window.toggleAllPersonnel=function(on){
+    const list=filteredEmployees();
+    if(!list.length) return;
+    const allSelected=list.every(e=>state.selected.has(empId(e)));
+    const shouldSelect = typeof on === 'boolean' ? on : !allSelected;
+    list.forEach(e=>{
+      const id=empId(e);
+      if(shouldSelect) state.selected.add(id);
+      else state.selected.delete(id);
+    });
+    renderPersonnelDirectory();
+  };
   window.clearPersonnelSelection=()=>{state.selected.clear();renderPersonnelDirectory()};
-  function updateBulk(){const bar=$('personnelBulkBar');if(bar)bar.classList.toggle('show',state.selected.size>0);if($('personnelSelectedCount'))$('personnelSelectedCount').textContent=state.selected.size}
+  function updateBulk(){
+    const bar=$('personnelBulkBar');if(bar)bar.classList.toggle('show',state.selected.size>0);
+    if($('personnelSelectedCount'))$('personnelSelectedCount').textContent=state.selected.size;
+    const list=filteredEmployees();
+    const headerCb=$('personnelSelectAllHeader');
+    if(headerCb && list.length){
+      const selectedInView = list.filter(e=>state.selected.has(empId(e))).length;
+      headerCb.checked = selectedInView === list.length;
+      headerCb.indeterminate = selectedInView > 0 && selectedInView < list.length;
+    }
+  }
 
   window.deleteSelectedPersonnel=async function(){
     if(!window.requirePersonnelAdmin('ลบบุคลากร')) return;
