@@ -25,7 +25,7 @@
         <div id="personnelAccessBanner" class="personnel-access-banner align-items-center gap-2"><i class="bi bi-eye-fill"></i><span>กำลังเปิดแบบดูอย่างเดียว — ต้องเข้าสู่ระบบด้วยบัญชี Admin จึงจะเพิ่ม แก้ไข ลบ ย้าย หรือนำเข้าข้อมูลได้</span></div>
         <section class="personnel-directory-toolbar">
           <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-            <div><h4 class="fw-bold text-success mb-1"><i class="bi bi-person-vcard-fill me-2"></i>สารบบบุคลากร</h4><div class="text-muted small">ข้อมูลจริงจาก Firestore ฐานหลัก · <b id="personnelDirectoryCount">0</b> คน</div></div>
+            <div><h4 class="fw-bold text-success mb-1"><i class="bi bi-people-fill me-2"></i>ระบบบุคลากร</h4><div class="text-muted small">ข้อมูลจริงจาก Firestore ฐานหลัก · <b id="personnelDirectoryCount">0</b> คน</div></div>
             <div class="btn-group btn-group-sm rounded-pill p-1 bg-light border">
               <button id="personnelViewTable" class="btn btn-success rounded-pill px-3" onclick="setPersonnelDirectoryView('table')"><i class="bi bi-table me-1"></i>ตาราง</button>
               <button id="personnelViewCard" class="btn rounded-pill px-3" onclick="setPersonnelDirectoryView('card')"><i class="bi bi-grid-fill me-1"></i>การ์ด</button>
@@ -43,12 +43,17 @@
             <button class="btn btn-outline-primary btn-sm rounded-pill fw-bold" onclick="openPersonnelQrScanner()"><i class="bi bi-qr-code-scan me-1"></i>สแกน QR บุคลากร</button>
             <button class="btn btn-outline-success btn-sm rounded-pill fw-bold personnel-admin-only" onclick="openPersonnelExcelImport()"><i class="bi bi-file-earmark-excel-fill me-1"></i>นำเข้า Excel</button>
             <button class="btn btn-outline-secondary btn-sm rounded-pill fw-bold" onclick="exportPersonnelCsv()"><i class="bi bi-download me-1"></i>ส่งออก CSV</button>
-            <button class="btn btn-outline-warning btn-sm rounded-pill fw-bold personnel-admin-only" onclick="openPersonnelPhotoSettings()"><i class="bi bi-images me-1"></i>ตั้งค่า/บีบอัดรูปเดิม</button>
+            <button class="btn btn-outline-warning btn-sm rounded-pill fw-bold personnel-admin-only" onclick="openPersonnelPhotoSettings()"><i class="bi bi-images me-1"></i>ตั้งค่าบีบอัดรูป</button>
+            <button class="btn btn-outline-danger btn-sm rounded-pill fw-bold personnel-admin-only d-flex align-items-center gap-1" onclick="openPersonnelTrash()"><i class="bi bi-trash3-fill text-danger"></i><span>บุคลากรที่ลบแล้ว</span><span id="personnelDirectoryTrashBadge" class="badge bg-danger text-white rounded-pill ms-1">0</span></button>
           </div>
         </section>
         <section id="personnelBulkBar" class="personnel-bulk-bar align-items-center justify-content-between gap-2">
           <div class="fw-bold text-success"><i class="bi bi-check2-square me-1"></i>เลือกแล้ว <span id="personnelSelectedCount">0</span> คน</div>
-          <div class="d-flex flex-wrap gap-2"><button class="btn btn-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint('SELECTED')"><i class="bi bi-printer-fill me-1"></i>พิมพ์บัตรที่เลือก</button><button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="clearPersonnelSelection()">ยกเลิกการเลือก</button></div>
+          <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint('SELECTED')"><i class="bi bi-printer-fill me-1"></i>พิมพ์บัตรที่เลือก</button>
+            <button class="btn btn-outline-danger btn-sm rounded-pill personnel-admin-only fw-bold" onclick="deleteSelectedPersonnel()"><i class="bi bi-trash3-fill me-1"></i>ลบบุคลากรที่เลือก</button>
+            <button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="clearPersonnelSelection()">ยกเลิกการเลือก</button>
+          </div>
         </section>
         <section class="personnel-directory-content"><div id="personnelDirectoryBody" class="personnel-empty"><div class="spinner-border text-success mb-2"></div><div>กำลังโหลดสารบบบุคลากร...</div></div></section>
       </div>`;
@@ -117,13 +122,58 @@
     body.innerHTML=state.view==='table'?tableMarkup(list):cardMarkup(list);updateBulk();updateAccessUi();
   };
 
-  function tableMarkup(list){return `<div class="personnel-table-wrap"><table class="table table-hover personnel-table"><thead><tr><th><input type="checkbox" onchange="toggleAllPersonnel(this.checked)"></th><th>รูป</th><th>รหัส</th><th>ชื่อ–นามสกุล</th><th>แผนก</th><th>ตำแหน่ง/รายละเอียด</th><th>โทรศัพท์</th><th class="text-center">เครื่องมือ</th></tr></thead><tbody>${list.map(e=>{const id=empId(e),checked=state.selected.has(id);return `<tr class="${checked?'table-success':''}"><td><input type="checkbox" ${checked?'checked':''} onchange="togglePersonnelSelection('${esc(id)}',this.checked)"></td><td><img class="personnel-avatar" src="${esc(e.photoUrl||'')}" onerror="this.src='favicon.png'"></td><td><span class="badge text-bg-dark font-monospace">${esc(e.code||id)}</span></td><td><b>${esc(e.name||'-')}</b>${e.nickname?`<div class="text-muted small">ชื่อเล่น: ${esc(e.nickname)}</div>`:''}</td><td>${esc(strip(e.department||'-'))}</td><td><b>${esc(strip(e.position||'-'))}</b><div class="text-muted small text-truncate" style="max-width:240px">${esc(e.details||e.note||'')}</div></td><td>${esc(e.phone||'-')}</td><td><div class="d-flex justify-content-center flex-wrap gap-1"><button class="btn btn-outline-primary btn-sm rounded-pill personnel-admin-only" onclick="openEditModal('${esc(id)}')"><i class="bi bi-pencil-square"></i></button><button class="btn btn-outline-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint(['${esc(id)}'])"><i class="bi bi-person-badge"></i></button><button class="btn btn-outline-info btn-sm rounded-pill" onclick="openPersonnelHistory('${esc(id)}')"><i class="bi bi-clock-history"></i></button></div></td></tr>`}).join('')}</tbody></table></div>`}
-  function cardMarkup(list){return `<div class="personnel-card-grid">${list.map(e=>{const id=empId(e),checked=state.selected.has(id);return `<article class="personnel-directory-card ${checked?'selected':''}"><input class="form-check-input position-absolute top-0 start-0 m-2" type="checkbox" ${checked?'checked':''} onchange="togglePersonnelSelection('${esc(id)}',this.checked)"><div class="d-flex gap-3 align-items-center"><img class="personnel-avatar" src="${esc(e.photoUrl||'')}" onerror="this.src='favicon.png'"><div class="min-width-0"><span class="badge text-bg-dark font-monospace">${esc(e.code||id)}</span><h6 class="fw-bold mt-2 mb-1">${esc(e.name||'-')}</h6><small class="text-muted">${e.nickname?'ชื่อเล่น '+esc(e.nickname)+' · ':''}${esc(e.phone||'-')}</small></div></div><hr><div class="small"><b class="text-success">${esc(strip(e.department||'-'))}</b><div>${esc(strip(e.position||'-'))}</div><div class="text-muted text-truncate">${esc(e.details||e.note||'')}</div></div><div class="d-flex gap-1 mt-3"><button class="btn btn-outline-primary btn-sm rounded-pill flex-fill personnel-admin-only" onclick="openEditModal('${esc(id)}')">แก้ไข</button><button class="btn btn-outline-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint(['${esc(id)}'])"><i class="bi bi-printer"></i></button><button class="btn btn-outline-info btn-sm rounded-pill" onclick="openPersonnelHistory('${esc(id)}')"><i class="bi bi-clock-history"></i></button></div></article>`}).join('')}</div>`}
+  function tableMarkup(list){return `<div class="personnel-table-wrap"><table class="table table-hover personnel-table"><thead><tr><th><input type="checkbox" onchange="toggleAllPersonnel(this.checked)"></th><th>รูป</th><th>รหัส</th><th>ชื่อ–นามสกุล</th><th>แผนก</th><th>ตำแหน่ง/รายละเอียด</th><th>โทรศัพท์</th><th class="text-center" style="min-width:180px">เครื่องมือ</th></tr></thead><tbody>${list.map(e=>{const id=empId(e),checked=state.selected.has(id);return `<tr class="${checked?'table-success':''}"><td><input type="checkbox" ${checked?'checked':''} onchange="togglePersonnelSelection('${esc(id)}',this.checked)"></td><td><img class="personnel-avatar" src="${esc(e.photoUrl||'')}" onerror="this.src='favicon.png'"></td><td><span class="badge text-bg-dark font-monospace">${esc(e.code||id)}</span></td><td><b>${esc(e.name||'-')}</b>${e.nickname?`<div class="text-muted small">ชื่อเล่น: ${esc(e.nickname)}</div>`:''}</td><td>${esc(strip(e.department||'-'))}</td><td><b>${esc(strip(e.position||'-'))}</b><div class="text-muted small text-truncate" style="max-width:240px">${esc(e.details||e.note||'')}</div></td><td>${esc(e.phone||'-')}</td><td><div class="personnel-table-actions"><button class="btn btn-outline-primary btn-sm rounded-pill personnel-admin-only" onclick="openEditModal('${esc(id)}')" title="แก้ไขข้อมูล"><i class="bi bi-pencil-square"></i></button><button class="btn btn-outline-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint(['${esc(id)}'])" title="พิมพ์บัตร"><i class="bi bi-person-badge"></i></button><button class="btn btn-outline-info btn-sm rounded-pill" onclick="openPersonnelHistory('${esc(id)}')" title="ประวัติการเบิกยืม"><i class="bi bi-clock-history"></i></button><button class="btn btn-outline-danger btn-sm rounded-pill personnel-admin-only" onclick="confirmDeleteEmployee('${esc(id)}','${esc(e.name||id)}')" title="ลบข้อมูล (ย้ายไปถังขยะ)"><i class="bi bi-trash3-fill"></i></button></div></td></tr>`}).join('')}</tbody></table></div>`}
+  function cardMarkup(list){return `<div class="personnel-card-grid">${list.map(e=>{const id=empId(e),checked=state.selected.has(id);return `<article class="personnel-directory-card ${checked?'selected':''}"><input class="form-check-input position-absolute top-0 start-0 m-2" type="checkbox" ${checked?'checked':''} onchange="togglePersonnelSelection('${esc(id)}',this.checked)"><div class="d-flex gap-3 align-items-center"><img class="personnel-avatar" src="${esc(e.photoUrl||'')}" onerror="this.src='favicon.png'"><div class="min-width-0"><span class="badge text-bg-dark font-monospace">${esc(e.code||id)}</span><h6 class="fw-bold mt-2 mb-1">${esc(e.name||'-')}</h6><small class="text-muted">${e.nickname?'ชื่อเล่น '+esc(e.nickname)+' · ':''}${esc(e.phone||'-')}</small></div></div><hr><div class="small"><b class="text-success">${esc(strip(e.department||'-'))}</b><div>${esc(strip(e.position||'-'))}</div><div class="text-muted text-truncate">${esc(e.details||e.note||'')}</div></div><div class="d-flex gap-1 mt-3 align-items-center"><button class="btn btn-outline-primary btn-sm rounded-pill flex-fill personnel-admin-only" onclick="openEditModal('${esc(id)}')">แก้ไข</button><button class="btn btn-outline-success btn-sm rounded-pill" onclick="openPersonnelBadgePrint(['${esc(id)}'])" title="พิมพ์บัตร"><i class="bi bi-printer"></i></button><button class="btn btn-outline-info btn-sm rounded-pill" onclick="openPersonnelHistory('${esc(id)}')" title="ประวัติ"><i class="bi bi-clock-history"></i></button><button class="btn btn-outline-danger btn-sm rounded-pill personnel-admin-only" onclick="confirmDeleteEmployee('${esc(id)}','${esc(e.name||id)}')" title="ลบข้อมูล"><i class="bi bi-trash3-fill"></i></button></div></article>`}).join('')}</div>`}
 
   window.togglePersonnelSelection=(id,on)=>{on?state.selected.add(id):state.selected.delete(id);renderPersonnelDirectory()};
   window.toggleAllPersonnel=on=>{filteredEmployees().forEach(e=>on?state.selected.add(empId(e)):state.selected.delete(empId(e)));renderPersonnelDirectory()};
   window.clearPersonnelSelection=()=>{state.selected.clear();renderPersonnelDirectory()};
   function updateBulk(){const bar=$('personnelBulkBar');if(bar)bar.classList.toggle('show',state.selected.size>0);if($('personnelSelectedCount'))$('personnelSelectedCount').textContent=state.selected.size}
+
+  window.deleteSelectedPersonnel=async function(){
+    if(!window.requirePersonnelAdmin('ลบบุคลากร')) return;
+    const selectedIds=[...state.selected];
+    if(!selectedIds.length){toast('กรุณาเลือกบุคลากรที่ต้องการลบ');return}
+    const count=selectedIds.length;
+    if(!confirm(`ย้ายข้อมูลบุคลากรที่เลือกจำนวน ${count} คน ไปยัง “บุคลากรที่ลบแล้ว” หรือไม่?\nสามารถกู้คืนกลับมาด้วยรหัสเดิมได้ทุกเมื่อ`)){
+      return;
+    }
+    const reasonInput=prompt(`ระบุเหตุผลการลบ (${count} คน):`,'ลบออกจากสารบบพร้อมกัน');
+    if(reasonInput===null) return;
+    const reason=reasonInput.trim()||'ไม่ระบุเหตุผล';
+    const api=window.personnelApi;
+    if(!api?.db){toast('ฐานข้อมูลยังไม่พร้อม จึงยังไม่ได้ลบ');return}
+
+    let successCount=0;
+    const deletedAt=new Date().toISOString();
+    for(const id of selectedIds){
+      const emp=(window.employees||[]).find(e=>empId(e)===id);
+      if(!emp) continue;
+      try{
+        const trashData={
+          ...emp,
+          originalId:id,
+          deletedAt,
+          deletedByUid:window.personnelAccess?.uid||'',
+          deletedByEmail:window.personnelAccess?.email||'',
+          deleteReason:reason,
+          deletedFrom:'personnel_directory_bulk'
+        };
+        await api.setDoc(api.doc(api.db,'deleted_employees',id),trashData);
+        await api.deleteDoc(api.doc(api.db,'employees',id));
+        successCount++;
+      }catch(err){
+        console.warn('Bulk delete failed for',id,err);
+      }
+    }
+    window.employees=(window.employees||[]).filter(e=>!state.selected.has(empId(e)));
+    if(typeof window.syncToLocalStorage==='function') window.syncToLocalStorage();
+    state.selected.clear();
+    await logAudit('ลบบุคลากรที่เลือก',`ย้ายไปถังขยะ ${successCount}/${count} คน (เหตุผล: ${reason})`,'BULK_DELETE');
+    toast(`ย้ายบุคลากร ${successCount} คน ไปยังบุคลากรที่ลบแล้วเรียบร้อย`);
+    renderPersonnelDirectory();
+    if(typeof window.renderOrgChart==='function') window.renderOrgChart();
+  };
 
   window.openPersonnelBadgePrint=function(scope){
     let ids=[];if(scope==='ALL')ids=(window.employees||[]).map(empId);else if(scope==='SELECTED')ids=[...state.selected];else if(Array.isArray(scope))ids=scope;else if(scope)ids=[scope];
@@ -133,7 +183,8 @@
   window.renderPersonnelBadgePreview=async function(){
     const target=$('personnelBadgePreview');if(!target)return;const people=badgeEmployees(),copies=Math.max(1,Math.min(20,Number($('badgeCopies')?.value)||1)),cols=Math.max(1,Math.min(4,Number($('badgeColumns')?.value)||4)),theme=$('badgeTheme')?.value||'#176e4c';
     const opts={photo:$('badgeShowPhoto')?.checked,qr:$('badgeShowQr')?.checked,role:$('badgeShowRole')?.checked,details:$('badgeShowDetails')?.checked};
-    const cards=[];people.forEach(e=>{const code=e.code||empId(e);const qrData=`EMPLOYEE:${code}`;for(let i=0;i<copies;i++)cards.push(`<div class="personnel-id-card" style="--badge-color:${theme}"><div class="personnel-id-card-header">โครงการรัตนบุปผา<div style="font-size:10px;opacity:.85">บัตรบุคลากร</div></div>${opts.photo?`<img class="personnel-id-card-photo" src="${esc(e.photoUrl||'favicon.png')}" onerror="this.src='favicon.png'">`:''}<b>${esc(e.name||'-')}</b><small class="font-monospace text-dark fw-bold">${esc(code)}</small>${opts.role?`<small class="text-success fw-bold">${esc(strip(e.position||'-'))}</small><small>${esc(strip(e.department||'-'))}</small>`:''}${opts.details?`<small>${esc(e.details||e.note||'')}</small><small>${esc(e.phone||'')}</small>`:''}${opts.qr?`<img class="personnel-id-card-qr" data-personnel-qr="${esc(qrData)}" alt="QR ${esc(code)}" title="QR ${esc(code)}">`:''}</div>`)});
+    const projectTitle = typeof window.getFloraProjectTitle === 'function' ? window.getFloraProjectTitle() : 'โครงการรัตนบุปผา';
+    const cards=[];people.forEach(e=>{const code=e.code||empId(e);const qrData=`EMPLOYEE:${code}`;for(let i=0;i<copies;i++)cards.push(`<div class="personnel-id-card" style="--badge-color:${theme}"><div class="personnel-id-card-header">${esc(projectTitle)}<div style="font-size:10px;opacity:.85">บัตรบุคลากร</div></div>${opts.photo?`<img class="personnel-id-card-photo" src="${esc(e.photoUrl||'favicon.png')}" onerror="this.src='favicon.png'">`:''}<b>${esc(e.name||'-')}</b><small class="font-monospace text-dark fw-bold">${esc(code)}</small>${opts.role?`<small class="text-success fw-bold">${esc(strip(e.position||'-'))}</small><small>${esc(strip(e.department||'-'))}</small>`:''}${opts.details?`<small>${esc(e.details||e.note||'')}</small><small>${esc(e.phone||'')}</small>`:''}${opts.qr?`<img class="personnel-id-card-qr" data-personnel-qr="${esc(qrData)}" alt="QR ${esc(code)}" title="QR ${esc(code)}">`:''}</div>`)});
     const width=$('badgePaper')?.value==='PVC'?'86mm':'100%';target.innerHTML=`<div class="personnel-badge-sheet" style="grid-template-columns:repeat(${cols},minmax(0,1fr));max-width:${width}">${cards.join('')}</div>`;await hydrateQr(target);
   };
   async function hydrateQr(root){
@@ -178,7 +229,7 @@
     w.document.close();
   };
 
-  function connectApi(){const api=window.personnelApi;if(!api||state.apiConnected)return;state.apiConnected=true;api.onSnapshot(api.collection(api.db,'transactions'),snap=>{state.transactions=snap.docs.map(d=>({id:d.id,...d.data()}));if(state.activeHistoryId)renderPersonnelHistory()},err=>console.warn('transactions listener',err));api.onSnapshot(api.collection(api.db,'deleted_employees'),snap=>{state.deletedEmployees=snap.docs.map(d=>({trashId:d.id,...d.data()})).sort((a,b)=>(Date.parse(b.deletedAt)||0)-(Date.parse(a.deletedAt)||0));const count=state.deletedEmployees.length;if($('personnelTrashCount'))$('personnelTrashCount').textContent=count;if($('orgPersonnelTrashBadge'))$('orgPersonnelTrashBadge').textContent=count;if($('personnelTrashModal')?.classList.contains('show'))renderPersonnelTrash()},err=>console.warn('deleted employees listener',err));}
+  function connectApi(){const api=window.personnelApi;if(!api||state.apiConnected)return;state.apiConnected=true;api.onSnapshot(api.collection(api.db,'transactions'),snap=>{state.transactions=snap.docs.map(d=>({id:d.id,...d.data()}));if(state.activeHistoryId)renderPersonnelHistory()},err=>console.warn('transactions listener',err));api.onSnapshot(api.collection(api.db,'deleted_employees'),snap=>{state.deletedEmployees=snap.docs.map(d=>({trashId:d.id,...d.data()})).sort((a,b)=>(Date.parse(b.deletedAt)||0)-(Date.parse(a.deletedAt)||0));const count=state.deletedEmployees.length;if($('personnelTrashCount'))$('personnelTrashCount').textContent=count;if($('orgPersonnelTrashBadge'))$('orgPersonnelTrashBadge').textContent=count;if($('personnelDirectoryTrashBadge'))$('personnelDirectoryTrashBadge').textContent=count;if($('personnelTrashModal')?.classList.contains('show'))renderPersonnelTrash()},err=>console.warn('deleted employees listener',err));}
 
   window.openPersonnelTrash=function(){if(!window.requirePersonnelAdmin('เปิดถังขยะบุคลากร'))return;$('personnelTrashSearch').value='';renderPersonnelTrash();bootstrap.Modal.getOrCreateInstance($('personnelTrashModal')).show()};
   window.renderPersonnelTrash=function(){const body=$('personnelTrashBody');if(!body)return;const q=($('personnelTrashSearch')?.value||'').trim().toLowerCase(),list=state.deletedEmployees.filter(x=>[x.name,x.code,x.originalId,x.department,x.position,x.deleteReason,x.deletedByEmail].join(' ').toLowerCase().includes(q));body.innerHTML=list.length?list.map(x=>{const id=String(x.trashId||x.originalId||x.id||''),photo=x.photoUrl||x.photo||'favicon.png';return `<tr><td><div class="d-flex align-items-center gap-2"><img class="personnel-avatar" src="${esc(photo)}" onerror="this.src='favicon.png'"><div><b>${esc(x.name||'-')}</b><div class="small font-monospace text-muted">${esc(x.code||x.originalId||'-')}</div></div></div></td><td><b>${esc(strip(x.position||'-'))}</b><div class="small text-muted">${esc(strip(x.department||'-'))}</div></td><td class="small">${esc(formatTrashDate(x.deletedAt))}</td><td class="small">${esc(x.deletedByEmail||'-')}<div class="text-muted">${esc(x.deleteReason||'ไม่ระบุเหตุผล')}</div></td><td><div class="d-flex justify-content-center flex-wrap gap-1"><button class="btn btn-success btn-sm rounded-pill" onclick="restorePersonnelFromTrash('${esc(id)}')"><i class="bi bi-arrow-counterclockwise me-1"></i>กู้คืน</button><button class="btn btn-outline-danger btn-sm rounded-pill" onclick="permanentlyDeletePersonnel('${esc(id)}')"><i class="bi bi-trash-fill me-1"></i>ลบถาวร</button></div></td></tr>`}).join(''):'<tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-trash3 fs-2 d-block mb-2"></i>ไม่มีบุคลากรที่ลบแล้ว</td></tr>'};

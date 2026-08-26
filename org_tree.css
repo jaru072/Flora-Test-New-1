@@ -5,26 +5,39 @@
   z-index: 1019;
   display: flex;
   justify-content: center;
-  gap: 8px;
-  padding: 9px 16px;
-  background: #eef4f1;
-  border-bottom: 1px solid #cddbd4;
-  box-shadow: 0 2px 8px rgba(15, 71, 49, .07);
+  gap: 10px;
+  padding: 10px 16px;
+  background: linear-gradient(180deg, #f0f6f3, #e5efe9);
+  border-bottom: 1px solid #c7d9d0;
+  box-shadow: 0 3px 10px rgba(15, 71, 49, .08);
 }
 .workspace-tab-btn {
-  border: 1px solid #b9cdc3;
-  background: #fff;
-  color: #315d4d;
+  border: 1.5px solid #b3cac0;
+  background: #ffffff;
+  color: #245644;
   border-radius: 999px;
-  padding: 8px 18px;
+  padding: 8px 22px;
   font-weight: 750;
-  font-size: 13px;
+  font-size: 14px;
+  letter-spacing: 0.1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+}
+.workspace-tab-btn:hover {
+  background: #f4faf6;
+  border-color: #176e4c;
+  color: #105238;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(23, 110, 76, 0.12);
 }
 .workspace-tab-btn.active {
   background: #176e4c;
   border-color: #176e4c;
-  color: #fff;
-  box-shadow: 0 5px 15px rgba(23, 110, 76, .22);
+  color: #ffffff;
+  box-shadow: 0 5px 16px rgba(23, 110, 76, .26);
 }
 .org-toolbar { top: 110px !important; }
 .tree-manager-panel {

@@ -371,6 +371,7 @@
   window.getFloraOrgQuickAssignGroups = getQuickAssignGroups;
   window.getFloraOrgNode = id => { const node=findNode(id); return node ? clone(node) : null; };
   window.getFloraOrgTree = () => clone(tree);
+  window.getFloraProjectTitle = () => (tree?.name || "โครงการรัตนบุปผา และผลิตดอกไม้ธรรมยาตรา").trim();
   window.syncFloraEmployeesToTree = (persist = true) => reconcileEmployeesFromTree(Boolean(persist));
   window.isEmployeeAssignedToFloraTree = emp => Boolean(resolveEmployeeNode(emp));
   window.resolveFloraAssignmentByLabels = (department, position) => {
@@ -383,28 +384,60 @@
   };
 
   window.switchWorkspaceTab = function(tab) {
-    const treeMode=tab==="tree";
-    const directoryMode=tab==="directory";
-    const attendanceMode=tab==="attendance";
-    const chartMode=tab==="org";
-    window.currentWorkspaceTab=tab;
-    document.getElementById("tabOrgChart")?.classList.toggle("active",tab==="org");
-    document.getElementById("tabPersonnelDirectory")?.classList.toggle("active",directoryMode);
-    document.getElementById("tabTreeManager")?.classList.toggle("active",treeMode);
-    document.getElementById("tabPersonnelAttendance")?.classList.toggle("active",attendanceMode);
-    ["orgQuickActions","orgToolbar","canvasWrapper","zoomControls","floatingUnassignedBtn"].forEach(id=>{ const el=document.getElementById(id); if(el) el.style.display=chartMode?"":"none"; });
-    const treePanel=document.getElementById("treeManagerPanel"); if(treePanel) treePanel.style.display=treeMode?"block":"none";
-    const directoryPanel=document.getElementById("personnelDirectoryPanel"); if(directoryPanel) directoryPanel.style.display=directoryMode?"block":"none";
-    const attendancePanel=document.getElementById("personnelAttendancePanel"); if(attendancePanel) attendancePanel.style.display=attendanceMode?"block":"none";
-    if(treeMode) {
-      window.closeUnassignedDrawer?.(); renderManager();
-    } else if(attendanceMode) {
-      window.closeUnassignedDrawer?.(); window.renderPersonnelAttendanceControls?.();
-    } else if(directoryMode) {
-      window.closeUnassignedDrawer?.(); window.renderPersonnelDirectory?.();
+    const treeMode = tab === "tree";
+    const directoryMode = tab === "directory";
+    const attendanceMode = tab === "attendance";
+    const chartMode = tab === "org";
+    window.currentWorkspaceTab = tab;
+
+    document.getElementById("tabOrgChart")?.classList.toggle("active", chartMode);
+    document.getElementById("tabPersonnelDirectory")?.classList.toggle("active", directoryMode);
+    document.getElementById("tabTreeManager")?.classList.toggle("active", treeMode);
+    document.getElementById("tabPersonnelAttendance")?.classList.toggle("active", attendanceMode);
+
+    const chartElementIds = ["orgQuickActions", "orgToolbar", "canvasWrapper", "zoomControls", "floatingUnassignedBtn"];
+    chartElementIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (chartMode) {
+          el.classList.remove("d-none");
+          el.style.removeProperty("display");
+        } else {
+          el.classList.add("d-none");
+          el.style.setProperty("display", "none", "important");
+        }
+      }
+    });
+
+    window.closeUnassignedDrawer?.();
+
+    const treePanel = document.getElementById("treeManagerPanel");
+    if (treePanel) {
+      treePanel.classList.toggle("d-none", !treeMode);
+      treePanel.style.display = treeMode ? "block" : "none";
+    }
+
+    const directoryPanel = document.getElementById("personnelDirectoryPanel");
+    if (directoryPanel) {
+      directoryPanel.classList.toggle("d-none", !directoryMode);
+      directoryPanel.style.display = directoryMode ? "block" : "none";
+    }
+
+    const attendancePanel = document.getElementById("personnelAttendancePanel");
+    if (attendancePanel) {
+      attendancePanel.classList.toggle("d-none", !attendanceMode);
+      attendancePanel.style.display = attendanceMode ? "block" : "none";
+    }
+
+    if (treeMode) {
+      renderManager();
+    } else if (attendanceMode) {
+      window.renderPersonnelAttendanceControls?.();
+    } else if (directoryMode) {
+      window.renderPersonnelDirectory?.();
     } else {
       window.switchView?.("hierarchy");
-      setTimeout(()=>window.fitToWidth?.(),80);
+      setTimeout(() => window.fitToWidth?.(), 80);
     }
   };
   window.connectOrgTreeFirestore = function(api) {

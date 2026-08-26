@@ -60,7 +60,7 @@
     /* Secondary Toolbar (Views, Search, Filters) */
     .org-toolbar {
       position: sticky;
-      top: 61px;
+      top: 110px;
       left: 0;
       right: 0;
       z-index: 1030;
@@ -68,6 +68,10 @@
       border-bottom: 1px solid #e2e8f0;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
       padding: 8px 20px;
+      display: flex;
+    }
+    .org-toolbar.d-none {
+      display: none !important;
     }
 
     /* Outer Viewport Wrapper (Pan & Zoom Container) */
@@ -710,11 +714,48 @@
       border: 1px solid #e2e8f0;
     }
 
+    /* Search Target Pulse Glowing Highlight Animation */
+    @keyframes searchPulseGlow {
+      0% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.95), 0 0 20px rgba(245, 158, 11, 0.85);
+        transform: scale(1);
+        outline: 3.5px solid #f59e0b;
+      }
+      50% {
+        box-shadow: 0 0 0 16px rgba(245, 158, 11, 0), 0 0 35px rgba(245, 158, 11, 0.95);
+        transform: scale(1.15);
+        outline: 4.5px solid #d97706;
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0), 0 0 20px rgba(245, 158, 11, 0.85);
+        transform: scale(1.08);
+        outline: 3.5px solid #f59e0b;
+      }
+    }
+
+    .search-target-highlight {
+      animation: searchPulseGlow 1.2s ease-in-out infinite alternate !important;
+      z-index: 9999 !important;
+      position: relative !important;
+      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+      border-radius: 12px !important;
+    }
+
+    .search-match-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: #795548;
+      background: #fff8e1;
+      border: 1px solid #ffe082;
+      border-radius: 999px;
+      padding: 2px 8px;
+    }
+
     /* Floating Tab Button to open Drawer */
     .unassigned-floating-btn {
       position: fixed;
       right: 0;
-      top: 130px;
+      top: 240px;
       z-index: 1035;
       background: linear-gradient(135deg, #0d2258 0%, #1e3a8a 100%);
       color: #ffffff;
@@ -729,6 +770,8 @@
       align-items: center;
       gap: 8px;
       cursor: pointer;
+      white-space: nowrap;
+      user-select: none;
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .unassigned-floating-btn:hover {
@@ -959,65 +1002,86 @@
       <div class="border-start border-secondary ps-3">
         <h6 class="mb-0 fw-bold text-warning d-flex align-items-center gap-2">
           <i class="bi bi-diagram-3-fill"></i>
-          <span>ผังโครงสร้างบุคลากร</span>
+          <span>ผังองค์กรและระบบบุคลากร</span>
         </h6>
-        <small class="text-white-50 fs-8">โครงการรัตนบุปผา และผลิตดอกไม้ธรรมยาตรา (สายวิชาการกำกับ 4.2, 4.3, 4.4)</small>
+        <small id="orgProjectHeaderSubtitle" class="text-white-50 fs-8">โครงการรัตนบุปผา และผลิตดอกไม้ธรรมยาตรา</small>
       </div>
     </div>
 
     <!-- Quick Actions -->
     <div class="d-flex align-items-center gap-2 flex-wrap" id="orgQuickActions">
-      <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 py-1.5 fw-bold text-dark shadow-sm d-flex align-items-center gap-1.5" onclick="toggleUnassignedDrawer()" title="เปิด/ปิด แผงบุคลากรรอระบุตำแหน่งลงผัง (Unassigned Pool)">
-        <i class="bi bi-person-lines-fill fs-6 text-dark"></i>
-        <span>รอลงผัง</span>
-        <span class="badge bg-danger rounded-pill ms-1" id="toolbarUnassignedBadge">0</span>
-      </button>
-
       <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 py-1.5 fw-bold text-dark shadow-sm d-flex align-items-center gap-1.5 personnel-admin-only" onclick="openAddModal()">
         <i class="bi bi-person-plus-fill fs-6"></i>
         <span>เพิ่มบุคลากร</span>
       </button>
 
-      <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 fw-bold shadow-sm d-flex align-items-center gap-1.5" onclick="downloadPosterPDF()" id="btnDownloadPdf" title="ดาวน์โหลดเป็น PDF คุณภาพสูง (A3/A4)">
-        <i class="bi bi-file-pdf fs-6"></i>
-        <span>ส่งออก PDF</span>
-      </button>
-
-      <button type="button" class="btn btn-success btn-sm rounded-pill px-3 py-1.5 fw-bold shadow-sm d-flex align-items-center gap-1.5" onclick="downloadPosterPNG()" id="btnDownloadPng" title="บันทึกภาพความละเอียดสูง HD (PNG)">
-        <i class="bi bi-image fs-6"></i>
-        <span>บันทึกรูปภาพ HD</span>
-      </button>
-
-      <button type="button" class="btn btn-outline-light btn-sm rounded-pill px-2.5 py-1.5 fw-semibold d-flex align-items-center gap-1" onclick="window.print()" title="พิมพ์ผังโครงสร้าง">
-        <i class="bi bi-printer"></i>
-        <span>พิมพ์ผัง</span>
-      </button>
+      <!-- Consolidated Export & Print Dropdown Menu -->
+      <div class="dropdown">
+        <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-semibold dropdown-toggle d-flex align-items-center gap-1.5 shadow-sm" type="button" id="dropdownExportMenu" data-bs-toggle="dropdown" aria-expanded="false" title="ส่งออกหรือพิมพ์ผังโครงสร้าง">
+          <i class="bi bi-box-arrow-up-right fs-6 text-warning"></i>
+          <span>ส่งออก / พิมพ์ผัง</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-1 py-2" aria-labelledby="dropdownExportMenu">
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="downloadPosterPDF()" id="btnDownloadPdf">
+              <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
+              <div>
+                <div class="fw-bold fs-7">ส่งออกเป็น PDF (Vector)</div>
+                <small class="text-muted fs-8">เอกสารความละเอียดสูง เหมาะสำหรับเปิดดู/พิมพ์ A3, A4</small>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="downloadPosterPNG()" id="btnDownloadPng">
+              <i class="bi bi-file-earmark-image-fill text-success fs-5"></i>
+              <div>
+                <div class="fw-bold fs-7">บันทึกรูปภาพ HD (PNG)</div>
+                <small class="text-muted fs-8">ภาพความละเอียดสูง สำหรับงานนำเสนอและส่งต่อ</small>
+              </div>
+            </button>
+          </li>
+          <li><hr class="dropdown-divider my-1"></li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="window.print()">
+              <i class="bi bi-printer-fill text-primary fs-5"></i>
+              <div>
+                <div class="fw-bold fs-7">สั่งพิมพ์ผังโครงสร้าง (Print)</div>
+                <small class="text-muted fs-8">พิมพ์ออกเครื่องพิมพ์โดยตรงตามขนาดกระดาษ</small>
+              </div>
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   </header>
 
   <nav class="workspace-tabs no-print" aria-label="เลือกหน้าจัดการผัง">
-    <button type="button" id="tabOrgChart" class="workspace-tab-btn active" onclick="switchWorkspaceTab('org')"><i class="bi bi-people-fill me-1"></i> ผังบุคลากร</button>
-    <button type="button" id="tabPersonnelDirectory" class="workspace-tab-btn" onclick="switchWorkspaceTab('directory')"><i class="bi bi-person-vcard-fill me-1"></i> สารบบบุคลากร</button>
+    <button type="button" id="tabOrgChart" class="workspace-tab-btn active" onclick="switchWorkspaceTab('org')"><i class="bi bi-diagram-3-fill me-1"></i> ผังองค์กร</button>
+    <button type="button" id="tabPersonnelDirectory" class="workspace-tab-btn" onclick="switchWorkspaceTab('directory')"><i class="bi bi-people-fill me-1"></i> ระบบบุคลากร</button>
     <button type="button" id="tabTreeManager" class="workspace-tab-btn" onclick="switchWorkspaceTab('tree')"><i class="bi bi-diagram-2-fill me-1"></i> จัดการโครงสร้าง (Tree)</button>
     <button type="button" id="tabPersonnelAttendance" class="workspace-tab-btn" onclick="switchWorkspaceTab('attendance')"><i class="bi bi-clock-history me-1"></i> ลงเวลา / การลา</button>
   </nav>
 
   <!-- ==================== SECONDARY TOOLBAR & CONTROLS ==================== -->
-  <div class="org-toolbar d-flex flex-wrap align-items-center justify-content-between gap-3 no-print" id="orgToolbar">
+  <div class="org-toolbar flex-wrap align-items-center justify-content-between gap-3 no-print" id="orgToolbar">
     
-    <!-- Search & Department Filter Controls -->
-    <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1" style="max-width: 650px;">
+    <!-- Search Bar with Match Navigator & Quick Jump -->
+    <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1" style="max-width: 600px;">
       <!-- Search Input -->
-      <div class="input-group input-group-sm" style="min-width: 220px; max-width: 320px;">
-        <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
-        <input type="text" id="searchInput" class="form-control border-start-0 bg-light fs-7" placeholder="🔍 ค้นหาชื่อ, รหัส, ตำแหน่ง..." oninput="handleSearch(this.value)">
+      <div class="input-group input-group-sm" style="min-width: 250px; max-width: 380px;">
+        <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-search"></i></span>
+        <input type="text" id="searchInput" class="form-control border-start-0 bg-white fs-7" placeholder="🔍 ค้นหาชื่อ, รหัส, หรือตำแหน่งในผัง..." oninput="handleSearch(this.value)" onkeydown="if(event.key==='Enter')navigateSearchResult(1)">
         <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()" title="ล้างการค้นหา"><i class="bi bi-x-circle-fill"></i></button>
       </div>
 
-      <!-- Department Filter -->
-      <select id="deptFilterSelect" class="form-select form-select-sm fw-semibold bg-light border" style="min-width: 180px; max-width: 240px;" onchange="filterByDepartment(this.value)">
-        <option value="ALL">🏢 แสดงทุกฝ่าย/แผนก</option>
-      </select>
+      <!-- Search Match Navigator (แสดงเมื่อมีการค้นหา) -->
+      <div id="searchNavControls" class="d-none align-items-center gap-1.5 bg-white border rounded-pill px-2.5 py-1 shadow-xs">
+        <span id="searchMatchCount" class="badge bg-warning text-dark rounded-pill fw-bold">0 พบ</span>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-0 border-0" onclick="navigateSearchResult(-1)" title="ไปยังคนก่อนหน้า"><i class="bi bi-chevron-up"></i></button>
+          <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-0 border-0" onclick="navigateSearchResult(1)" title="ไปยังคนถัดไป"><i class="bi bi-chevron-down"></i></button>
+        </div>
+      </div>
     </div>
 
     <!-- Stats Badges & Actions -->
@@ -1033,7 +1097,7 @@
       </div>
 
       <!-- Deleted Personnel / Trash Button -->
-      <button type="button" id="btnOrgTrash" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 py-1 fw-semibold shadow-sm personnel-admin-only d-flex align-items-center gap-1" onclick="window.openPersonnelTrash ? window.openPersonnelTrash() : null" title="บุคลากรที่ลบแล้ว (สามารถกู้คืนหรือลบถาวรได้)">
+      <button type="button" id="btnOrgTrash" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 py-1 fw-semibold shadow-sm personnel-admin-only d-flex align-items-center gap-1 text-nowrap flex-shrink-0" onclick="window.openPersonnelTrash ? window.openPersonnelTrash() : null" title="บุคลากรที่ลบแล้ว (สามารถกู้คืนหรือลบถาวรได้)">
         <i class="bi bi-trash3-fill fs-6 text-danger"></i>
         <span>บุคลากรที่ลบแล้ว</span>
         <span id="orgPersonnelTrashBadge" class="badge bg-danger text-white rounded-pill ms-1">0</span>
@@ -1234,23 +1298,23 @@
         <!-- Navigation Tabs (Only shown when adding/assigning to a slot) -->
         <ul class="nav nav-tabs nav-fill bg-light px-3 pt-2 border-bottom" id="empModalTabs" role="tablist">
           <li class="nav-item" role="presentation">
-            <button class="nav-link active fw-bold text-dark d-flex align-items-center justify-content-center gap-2 py-2.5" id="tab-assign-btn" data-bs-toggle="tab" data-bs-target="#tab-assign-pane" type="button" role="tab" aria-selected="true">
-              <i class="bi bi-person-check-fill text-success fs-6"></i>
-              <span>1. 🔍 ค้นหาและโยกย้ายคนเดิม (แนะนำ)</span>
+            <button class="nav-link active fw-bold text-dark d-flex align-items-center justify-content-center gap-2 py-2.5" id="tab-new-btn" data-bs-toggle="tab" data-bs-target="#tab-new-pane" type="button" role="tab" aria-selected="true">
+              <i class="bi bi-person-plus-fill text-primary fs-6"></i>
+              <span id="tabNewTitleText">1. ➕ สร้างบุคลากรใหม่</span>
             </button>
           </li>
           <li class="nav-item" role="presentation">
-            <button class="nav-link fw-semibold text-muted d-flex align-items-center justify-content-center gap-2 py-2.5" id="tab-new-btn" data-bs-toggle="tab" data-bs-target="#tab-new-pane" type="button" role="tab" aria-selected="false">
-              <i class="bi bi-person-plus-fill text-primary fs-6"></i>
-              <span id="tabNewTitleText">2. ➕ สร้างบุคลากรใหม่</span>
+            <button class="nav-link fw-semibold text-muted d-flex align-items-center justify-content-center gap-2 py-2.5" id="tab-assign-btn" data-bs-toggle="tab" data-bs-target="#tab-assign-pane" type="button" role="tab" aria-selected="false">
+              <i class="bi bi-person-check-fill text-success fs-6"></i>
+              <span>2. 🔍 ค้นหาและโยกย้ายคนเดิม</span>
             </button>
           </li>
         </ul>
 
         <div class="tab-content" id="empModalTabContent">
           
-          <!-- ==================== TAB 1: ASSIGN EXISTING EMPLOYEE ==================== -->
-          <div class="tab-pane fade show active p-4" id="tab-assign-pane" role="tabpanel" tabindex="0">
+          <!-- ==================== TAB 2: ASSIGN EXISTING EMPLOYEE ==================== -->
+          <div class="tab-pane fade p-4" id="tab-assign-pane" role="tabpanel" tabindex="0">
             <!-- Target Slot Alert Banner -->
             <div class="alert alert-info border-info-subtle d-flex align-items-center justify-content-between p-3 rounded-3 mb-3">
               <div class="d-flex align-items-center gap-2">
@@ -1279,12 +1343,12 @@
             </div>
             
             <div class="text-muted fs-8 text-center mt-3">
-              💡 หากบุคคลนี้ยังไม่มีข้อมูลในระบบ ให้คลิกแท็บ <b>"2. ➕ สร้างบุคลากรใหม่"</b> ด้านบน
+              💡 หากต้องการสร้างบุคลากรใหม่ ให้คลิกแท็บ <b>"1. ➕ สร้างบุคลากรใหม่"</b> ด้านบน
             </div>
           </div>
 
-          <!-- ==================== TAB 2: CREATE / EDIT FULL EMPLOYEE FORM ==================== -->
-          <div class="tab-pane fade" id="tab-new-pane" role="tabpanel" tabindex="0">
+          <!-- ==================== TAB 1: CREATE / EDIT FULL EMPLOYEE FORM ==================== -->
+          <div class="tab-pane fade show active" id="tab-new-pane" role="tabpanel" tabindex="0">
             <form id="empForm" onsubmit="handleSaveEmployee(event)">
               <input type="hidden" id="empEditId" value="" />
 
@@ -2243,6 +2307,10 @@
     };
 
     function updateStats() {
+      const projectTitle = typeof window.getFloraProjectTitle === 'function' ? window.getFloraProjectTitle() : 'โครงการรัตนบุปผา และผลิตดอกไม้ธรรมยาตรา';
+      const subTitleEl = document.getElementById('orgProjectHeaderSubtitle');
+      if (subTitleEl) subTitleEl.textContent = projectTitle;
+
       const depts = new Set();
       window.employees.forEach(e => {
         if (e.department) depts.add(e.department);
@@ -2648,7 +2716,7 @@
           <!-- ==================== 1. TOP ROYAL BANNER ==================== -->
           <div class="top-navy-banner">
             <h1 class="banner-title text-center">
-              โครงสร้างบุคลากร โครงการรัตนบุปผา และผลิตดอกไม้ธรรมยาตรา
+              ${escapeHtml(typeof window.getFloraProjectTitle === 'function' ? window.getFloraProjectTitle() : 'โครงการรัตนบุปผา และผลิตดอกไม้ธรรมยาตรา')}
             </h1>
           </div>
 
@@ -3204,22 +3272,22 @@
       window.targetAssignPosNodeId = treeAssignment?.positionNodeId || '';
       updatePositionDropdownOptions(); updateDepartmentDropdownOptions();
 
-      // Show Tab 1 & Tab navigation
+      // Show Tab 1 (Create New) by default & Tab navigation
       document.getElementById('empModalTabs').classList.remove('d-none');
       const tabAssignBtn = document.getElementById('tab-assign-btn');
       const tabAssignPane = document.getElementById('tab-assign-pane');
       const tabNewBtn = document.getElementById('tab-new-btn');
       const tabNewPane = document.getElementById('tab-new-pane');
 
-      tabAssignBtn.classList.add('active');
-      tabAssignPane.classList.add('show', 'active');
-      tabNewBtn.classList.remove('active');
-      tabNewPane.classList.remove('show', 'active');
-      document.getElementById('tabNewTitleText').textContent = '2. ➕ สร้างบุคลากรใหม่';
+      tabNewBtn.classList.add('active');
+      tabNewPane.classList.add('show', 'active');
+      tabAssignBtn.classList.remove('active');
+      tabAssignPane.classList.remove('show', 'active');
+      document.getElementById('tabNewTitleText').textContent = '1. ➕ สร้างบุคลากรใหม่';
 
       document.getElementById('empModalTitle').textContent = 'จัดการบุคลากรในตำแหน่ง';
       document.getElementById('empModalSubtitle').textContent = `ตำแหน่งเป้าหมาย: ${stripStructureCode(window.targetAssignDept)} (${stripStructureCode(window.targetAssignPos)})`;
-      document.getElementById('modalHeaderIcon').className = 'bi bi-person-check-fill fs-5';
+      document.getElementById('modalHeaderIcon').className = 'bi bi-person-plus-fill fs-5';
       document.getElementById('btnDeleteEmployee').classList.add('d-none');
       if (document.getElementById('btnPrintEmployeeBadgeModal')) document.getElementById('btnPrintEmployeeBadgeModal').classList.add('d-none');
 
@@ -4385,15 +4453,148 @@
       renderOrgChart();
     };
 
+    window.searchMatchedIds = [];
+    window.currentSearchMatchIndex = -1;
+    window.searchDebounceTimer = null;
+
     window.handleSearch = function(keyword) {
-      window.searchKeyword = keyword.trim();
-      renderOrgChart();
+      const q = (keyword || '').trim();
+      window.searchKeyword = q;
+
+      // Clear existing highlight timeout
+      if (window.searchHighlightTimer) {
+        clearTimeout(window.searchHighlightTimer);
+        window.searchHighlightTimer = null;
+      }
+
+      // Remove existing search highlights from previous search
+      document.querySelectorAll('.search-target-highlight').forEach(el => {
+        el.classList.remove('search-target-highlight');
+      });
+
+      const navControls = document.getElementById('searchNavControls');
+      const countBadge = document.getElementById('searchMatchCount');
+
+      if (!q) {
+        window.searchMatchedIds = [];
+        window.currentSearchMatchIndex = -1;
+        if (navControls) navControls.className = 'd-none';
+        return;
+      }
+
+      const qLower = q.toLowerCase();
+
+      // Find matching employees (เฉพาะคนที่อยู่ในผังโครงสร้างแล้วเท่านั้น ไม่รวมคนที่รอลงผัง)
+      const matched = (window.employees || []).filter(emp => {
+        if (typeof window.isUnassignedEmployee === 'function' && window.isUnassignedEmployee(emp)) {
+          return false;
+        }
+        const name = (emp.name || '').toLowerCase();
+        const code = (emp.code || emp.id || '').toLowerCase();
+        const pos = (emp.position || '').toLowerCase();
+        const dept = (emp.department || '').toLowerCase();
+        const nickname = (emp.nickname || '').toLowerCase();
+        return name.includes(qLower) || code.includes(qLower) || pos.includes(qLower) || dept.includes(qLower) || nickname.includes(qLower);
+      });
+
+      window.searchMatchedIds = matched.map(e => String(e.id || e.code));
+      window.currentSearchMatchIndex = matched.length > 0 ? 0 : -1;
+
+      if (navControls && countBadge) {
+        if (matched.length > 0) {
+          navControls.className = 'd-flex align-items-center gap-1.5 bg-white border rounded-pill px-2.5 py-1 shadow-xs';
+          countBadge.textContent = `พบ ${matched.length} คน (1/${matched.length})`;
+        } else {
+          navControls.className = 'd-flex align-items-center gap-1.5 bg-white border rounded-pill px-2.5 py-1 shadow-xs';
+          countBadge.textContent = 'ไม่พบบุคลากร';
+        }
+      }
+
+      // Debounce scroll to first match
+      clearTimeout(window.searchDebounceTimer);
+      window.searchDebounceTimer = setTimeout(() => {
+        if (window.searchMatchedIds.length > 0) {
+          jumpToEmployeeCard(window.searchMatchedIds[0]);
+        }
+      }, 250);
+    };
+
+    window.navigateSearchResult = function(direction) {
+      if (!window.searchMatchedIds || window.searchMatchedIds.length === 0) return;
+
+      window.currentSearchMatchIndex += direction;
+      if (window.currentSearchMatchIndex >= window.searchMatchedIds.length) {
+        window.currentSearchMatchIndex = 0;
+      } else if (window.currentSearchMatchIndex < 0) {
+        window.currentSearchMatchIndex = window.searchMatchedIds.length - 1;
+      }
+
+      const countBadge = document.getElementById('searchMatchCount');
+      if (countBadge) {
+        countBadge.textContent = `พบ ${window.searchMatchedIds.length} คน (${window.currentSearchMatchIndex + 1}/${window.searchMatchedIds.length})`;
+      }
+
+      const targetId = window.searchMatchedIds[window.currentSearchMatchIndex];
+      jumpToEmployeeCard(targetId);
+    };
+
+    window.jumpToEmployeeCard = function(empId) {
+      if (!empId) return;
+
+      // Remove highlight from previous items
+      document.querySelectorAll('.search-target-highlight').forEach(el => {
+        el.classList.remove('search-target-highlight');
+      });
+
+      // Find element in Org chart by diverse selectors
+      let targetEl = document.getElementById(`avatar-item-${empId}`);
+      if (!targetEl) targetEl = document.getElementById(`slot-lead-${empId}`);
+      if (!targetEl) targetEl = document.querySelector(`[id*="${empId}"]`);
+
+      // If in executive slots, look by text or onclick
+      if (!targetEl) {
+        const execBoxes = document.querySelectorAll('.exec-box, .section-head-box, .academic-middle-box, .team-leader-slot, .avatar-item');
+        for (const box of execBoxes) {
+          if (box.getAttribute('onclick')?.includes(empId) || box.getAttribute('title')?.includes(empId)) {
+            targetEl = box;
+            break;
+          }
+        }
+      }
+
+      if (targetEl) {
+        // Smooth scroll to the target element with viewport centering
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+
+        // Add glowing pulse animation class
+        targetEl.classList.add('search-target-highlight');
+
+        // Automatically remove highlight after 5 seconds
+        if (window.searchHighlightTimer) clearTimeout(window.searchHighlightTimer);
+        window.searchHighlightTimer = setTimeout(() => {
+          if (targetEl) targetEl.classList.remove('search-target-highlight');
+        }, 5000);
+      }
     };
 
     window.clearSearch = function() {
-      document.getElementById('searchInput').value = '';
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) searchInput.value = '';
       window.searchKeyword = '';
-      renderOrgChart();
+      window.searchMatchedIds = [];
+      window.currentSearchMatchIndex = -1;
+
+      const navControls = document.getElementById('searchNavControls');
+      if (navControls) navControls.className = 'd-none';
+
+      document.querySelectorAll('.search-target-highlight').forEach(el => {
+        el.classList.remove('search-target-highlight');
+      });
+
+      if (window.searchHighlightTimer) {
+        clearTimeout(window.searchHighlightTimer);
+        window.searchHighlightTimer = null;
+      }
     };
 
     window.reloadEmployeeData = async function() {
