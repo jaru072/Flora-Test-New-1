@@ -710,6 +710,13 @@ window.exportBackupToSelectedFolder = async function() {
     }
 
     const now = new Date();
+    let orgTreeBackup = null;
+    try {
+      if (typeof window.getFloraOrgTree === 'function') orgTreeBackup = window.getFloraOrgTree();
+      else if (localStorage.getItem('flora_org_tree_v2')) orgTreeBackup = JSON.parse(localStorage.getItem('flora_org_tree_v2'));
+      else if (localStorage.getItem('flora_org_tree_data')) orgTreeBackup = JSON.parse(localStorage.getItem('flora_org_tree_data'));
+    } catch(e) {}
+
     const backupData = {
       version: "2.0",
       appName: "Flora Garden Stock & Employee System",
@@ -717,6 +724,7 @@ window.exportBackupToSelectedFolder = async function() {
       backupDateThai: now.toLocaleString('th-TH'),
       equipmentList: clonedEquipment,
       employeeList: clonedEmployees,
+      orgStructure: orgTreeBackup,
       deletedEmployees: safeJsonClone(window.deletedEmployees || []),
       transactionHistory: window.transactionHistory || [],
       attendanceLogs: window.attendanceLogs || [],
@@ -803,6 +811,14 @@ window.downloadBackupAsZipPackage = async function() {
     backupDateThai: now.toLocaleString('th-TH'),
     equipmentList: clonedEquipment,
     employeeList: clonedEmployees,
+    orgStructure: (function(){
+      try {
+        if (typeof window.getFloraOrgTree === 'function') return window.getFloraOrgTree();
+        if (localStorage.getItem('flora_org_tree_v2')) return JSON.parse(localStorage.getItem('flora_org_tree_v2'));
+        if (localStorage.getItem('flora_org_tree_data')) return JSON.parse(localStorage.getItem('flora_org_tree_data'));
+      } catch(e) {}
+      return null;
+    })(),
     deletedEmployees: safeJsonClone(window.deletedEmployees || []),
     transactionHistory: window.transactionHistory || [],
     attendanceLogs: window.attendanceLogs || [],
@@ -867,6 +883,14 @@ window.downloadDatabaseBackup = async function() {
       backupDateThai: thaiDateStr,
       equipmentList: clonedEquipment,
       employeeList: clonedEmployees,
+      orgStructure: (function(){
+        try {
+          if (typeof window.getFloraOrgTree === 'function') return window.getFloraOrgTree();
+          if (localStorage.getItem('flora_org_tree_v2')) return JSON.parse(localStorage.getItem('flora_org_tree_v2'));
+          if (localStorage.getItem('flora_org_tree_data')) return JSON.parse(localStorage.getItem('flora_org_tree_data'));
+        } catch(e) {}
+        return null;
+      })(),
       deletedEmployees: safeJsonClone(window.deletedEmployees || []),
       transactionHistory: window.transactionHistory || [],
       attendanceLogs: window.attendanceLogs || [],
@@ -1863,6 +1887,23 @@ window.executeRestoreDatabase = async function() {
           }
           for (const aud of (auditLogs || [])) {
             if (aud && aud.id) await setDoc(doc(window.db, "audit_logs", aud.id), aud);
+          }
+        }
+
+        // Restore Org Structure Tree if present
+        const restoredTree = tempParsedRestoreData.orgStructure || tempParsedRestoreData.org_structure || tempParsedRestoreData.tree;
+        if (restoredTree) {
+          try {
+            await setDoc(doc(window.db, "org_structure", "main"), {
+              format: "FLORA_ORG_TREE",
+              version: 2,
+              tree: restoredTree,
+              updatedAt: new Date().toISOString()
+            }, { merge: true });
+            localStorage.setItem('flora_org_tree_v2', JSON.stringify(restoredTree));
+            localStorage.setItem('flora_org_tree_data', JSON.stringify(restoredTree));
+          } catch (treeErr) {
+            console.warn("Restore org_structure notice:", treeErr);
           }
         }
       } catch (fsErr) {

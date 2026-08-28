@@ -49,6 +49,7 @@
             <button class="btn btn-outline-primary btn-sm rounded-pill fw-bold" onclick="openPersonnelQrScanner()"><i class="bi bi-qr-code-scan me-1"></i>สแกน QR บุคลากร</button>
             <button class="btn btn-outline-success btn-sm rounded-pill fw-bold personnel-admin-only" onclick="openPersonnelExcelImport()"><i class="bi bi-file-earmark-excel-fill me-1"></i>นำเข้า Excel</button>
             <button class="btn btn-outline-secondary btn-sm rounded-pill fw-bold" onclick="exportPersonnelCsv()"><i class="bi bi-download me-1"></i>ส่งออก CSV</button>
+            <button class="btn btn-outline-primary btn-sm rounded-pill fw-bold personnel-admin-only" onclick="openPersonnelBackupRestoreModal()"><i class="bi bi-database-fill-gear me-1"></i>สำรอง/กู้คืนระบบบุคคล</button>
             <button class="btn btn-outline-warning btn-sm rounded-pill fw-bold personnel-admin-only" onclick="openPersonnelPhotoSettings()"><i class="bi bi-images me-1"></i>ตั้งค่าบีบอัดรูป</button>
             <button class="btn btn-outline-danger btn-sm rounded-pill fw-bold personnel-admin-only d-flex align-items-center gap-1" onclick="openPersonnelTrash()"><i class="bi bi-trash3-fill text-danger"></i><span>บุคลากรที่ลบแล้ว</span><span id="personnelDirectoryTrashBadge" class="badge bg-danger text-white rounded-pill ms-1">0</span></button>
           </div>

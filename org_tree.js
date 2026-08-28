@@ -411,12 +411,35 @@
     const chartMode = tab === "org";
     window.currentWorkspaceTab = tab;
 
-    document.getElementById("tabOrgChart")?.classList.toggle("active", chartMode);
-    document.getElementById("tabPersonnelDirectory")?.classList.toggle("active", directoryMode);
-    document.getElementById("tabTreeManager")?.classList.toggle("active", treeMode);
-    document.getElementById("tabPersonnelAttendance")?.classList.toggle("active", attendanceMode);
+    const tabOrg = document.getElementById("tabOrgChart");
+    const tabDir = document.getElementById("tabPersonnelDirectory");
+    const tabTree = document.getElementById("tabTreeManager");
+    const tabAtt = document.getElementById("tabPersonnelAttendance");
 
-    const chartElementIds = ["orgToolbar", "canvasWrapper", "zoomControls", "floatingUnassignedBtn"];
+    [tabOrg, tabDir, tabTree, tabAtt].forEach(btn => {
+      if (btn) {
+        btn.classList.remove("active", "bg-primary", "bg-opacity-10", "text-primary");
+      }
+    });
+
+    const menuLabel = document.getElementById("currentSystemMenuLabel");
+
+    if (chartMode) {
+      tabOrg?.classList.add("active", "bg-primary", "bg-opacity-10", "text-primary");
+      if (menuLabel) menuLabel.textContent = "ผังองค์กร";
+    } else if (directoryMode) {
+      tabDir?.classList.add("active", "bg-primary", "bg-opacity-10", "text-primary");
+      if (menuLabel) menuLabel.textContent = "สารบรรณ";
+    } else if (treeMode) {
+      tabTree?.classList.add("active", "bg-primary", "bg-opacity-10", "text-primary");
+      if (menuLabel) menuLabel.textContent = "โครงสร้าง";
+    } else if (attendanceMode) {
+      tabAtt?.classList.add("active", "bg-primary", "bg-opacity-10", "text-primary");
+      if (menuLabel) menuLabel.textContent = "เวลา/การลา";
+    }
+
+    // Keep orgToolbar visible across tabs so users can always switch tabs using the System Menu Dropdown
+    const chartElementIds = ["canvasWrapper", "zoomControls", "floatingUnassignedBtn"];
     chartElementIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) {

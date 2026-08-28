@@ -331,12 +331,30 @@
         const nowIso = new Date().toISOString();
         
         if (userSnap.exists()) {
-          currentUserProfile = { id: user.uid, ...userSnap.data(), isOnline: true, status: 'Online', lastActiveAt: nowIso, lastLoginAt: nowIso };
+          const data = userSnap.data();
+          currentUserProfile = { 
+            id: user.uid, 
+            ...data, 
+            accessPersonnel: data.accessPersonnel !== undefined ? data.accessPersonnel : true,
+            accessInventory: data.accessInventory !== undefined ? data.accessInventory : true,
+            isOnline: true, 
+            status: 'Online', 
+            lastActiveAt: nowIso, 
+            lastLoginAt: nowIso 
+          };
           if (user.email === 'jaru072@gmail.com') {
             currentUserProfile.role = 'ADMIN';
+            currentUserProfile.accessPersonnel = true;
+            currentUserProfile.accessInventory = true;
           }
           await setDoc(userRef, {
             role: currentUserProfile.role || 'WORKER',
+            accessPersonnel: currentUserProfile.accessPersonnel !== false,
+            accessInventory: currentUserProfile.accessInventory !== false,
+            modules: [
+              ...(currentUserProfile.accessPersonnel !== false ? ['personnel'] : []),
+              ...(currentUserProfile.accessInventory !== false ? ['inventory'] : [])
+            ],
             isOnline: true,
             status: 'Online',
             lastActiveAt: nowIso,
@@ -350,6 +368,9 @@
             displayName: user.displayName || user.email?.split('@')[0] || 'ผู้ใช้งาน',
             photoURL: user.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80',
             role: user.email === 'jaru072@gmail.com' ? 'ADMIN' : defaultRole,
+            accessPersonnel: true,
+            accessInventory: true,
+            modules: ['personnel', 'inventory'],
             isOnline: true,
             status: 'Online',
             lastActiveAt: nowIso,
@@ -361,17 +382,93 @@
 
         if (user.email === 'jaru072@gmail.com') {
           currentUserProfile.role = 'ADMIN';
+          currentUserProfile.accessPersonnel = true;
+          currentUserProfile.accessInventory = true;
         }
         
+        sessionStorage.setItem('flora_personnel_access', JSON.stringify({
+          uid: currentUserProfile?.uid || user.uid,
+          email: currentUserProfile?.email || user.email || '',
+          displayName: currentUserProfile?.displayName || user.displayName || 'ผู้ใช้งาน',
+          photoURL: currentUserProfile?.photoURL || user.photoURL || '',
+          role: currentUserProfile?.role || 'WORKER',
+          accessPersonnel: currentUserProfile?.accessPersonnel !== false,
+          accessInventory: currentUserProfile?.accessInventory !== false,
+          isAdmin: currentUserProfile?.role === 'ADMIN'
+        }));
+
         setRole(currentUserProfile.role || 'WORKER');
         updateAuthUI();
         if (typeof window.hideMandatoryLoginScreen === 'function') {
           window.hideMandatoryLoginScreen();
         }
+        if (typeof window.checkModuleAccess === 'function') {
+          window.checkModuleAccess('inventory');
+        }
       } catch (err) {
         console.warn("Error syncing user profile:", err);
       }
     }
+
+    // Check Module-Level Access Control (Inventory vs. Personnel)
+    window.checkModuleAccess = function(currentModule = 'inventory') {
+      const isSuperAdmin = currentRole === 'ADMIN' || currentAuthUser?.email === 'jaru072@gmail.com' || currentUserProfile?.email === 'jaru072@gmail.com';
+      if (isSuperAdmin) {
+        const modalElem = document.getElementById('moduleAccessDeniedModal');
+        if (modalElem && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          const bsModal = bootstrap.Modal.getInstance(modalElem);
+          if (bsModal) bsModal.hide();
+        }
+        return true;
+      }
+
+      if (!currentAuthUser && !currentUserProfile) return true;
+
+      const hasInventory = currentUserProfile?.accessInventory !== false;
+      const hasPersonnel = currentUserProfile?.accessPersonnel !== false;
+
+      // In inventory (index.html), if accessInventory is false:
+      if (currentModule === 'inventory' && !hasInventory) {
+        const modalElem = document.getElementById('moduleAccessDeniedModal');
+        if (modalElem && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          const nameElem = document.getElementById('moduleDeniedUserName');
+          const emailElem = document.getElementById('moduleDeniedUserEmail');
+          const switchBtn = document.getElementById('btnSwitchToAllowedPersonnel');
+          if (nameElem) nameElem.textContent = currentAuthUser?.displayName || currentUserProfile?.displayName || 'ผู้ใช้งาน';
+          if (emailElem) emailElem.textContent = currentAuthUser?.email || currentUserProfile?.email || '-';
+          if (switchBtn) {
+            if (hasPersonnel) {
+              switchBtn.classList.remove('d-none');
+            } else {
+              switchBtn.classList.add('d-none');
+            }
+          }
+          const bsModal = bootstrap.Modal.getOrCreateInstance(modalElem);
+          bsModal.show();
+        }
+        return false;
+      } else {
+        const modalElem = document.getElementById('moduleAccessDeniedModal');
+        if (modalElem && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+          const bsModal = bootstrap.Modal.getInstance(modalElem);
+          if (bsModal) bsModal.hide();
+        }
+      }
+
+      // Also update the header button to personnel:
+      const switcherBtn = document.getElementById('navModuleSwitcherPersonnel');
+      if (switcherBtn) {
+        if (!hasPersonnel && !isSuperAdmin) {
+          switcherBtn.classList.add('opacity-50');
+          switcherBtn.title = 'คุณไม่ได้รับสิทธิ์เข้าใช้งานระบบงานบุคคล';
+        } else {
+          switcherBtn.classList.remove('opacity-50');
+          switcherBtn.title = 'สลับไปยังระบบงานบุคคลและผังองค์กร (HR)';
+        }
+      }
+
+      return true;
+    };
 
     // Update Auth UI Elements
     window.updateAuthUI = function() {
@@ -404,15 +501,41 @@
         const profileUid = document.getElementById('userProfileUid');
         const profileRoleBadge = document.getElementById('userProfileRoleBadge');
 
-        if (profileImg) profileImg.src = currentAuthUser.photoURL || currentUserProfile?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
-        if (profileName) profileName.textContent = currentAuthUser.displayName || currentUserProfile?.displayName || 'ผู้ใช้งาน';
-        if (profileEmail) profileEmail.textContent = currentAuthUser.email || currentUserProfile?.email || '-';
+        // Dropdown Header Elements
+        const menuAvatar = document.getElementById('menuUserAvatar');
+        const menuName = document.getElementById('menuUserName');
+        const menuEmail = document.getElementById('menuUserEmail');
+        const menuRoleBadge = document.getElementById('menuUserRoleBadge');
+
+        const userDisplayName = currentAuthUser.displayName || currentUserProfile?.displayName || 'ผู้ใช้งาน';
+        const userEmailVal = currentAuthUser.email || currentUserProfile?.email || '-';
+        const userPhotoVal = currentAuthUser.photoURL || currentUserProfile?.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+
+        if (profileImg) profileImg.src = userPhotoVal;
+        if (profileName) profileName.textContent = userDisplayName;
+        if (profileEmail) profileEmail.textContent = userEmailVal;
         if (profileUid) profileUid.textContent = `UID: ${currentAuthUser.uid}`;
         if (profileRoleBadge) {
           profileRoleBadge.textContent = rName;
           if (currentRole === 'ADMIN') profileRoleBadge.className = 'badge bg-danger rounded-pill px-3 py-2';
           else if (currentRole === 'MANAGER') profileRoleBadge.className = 'badge bg-primary rounded-pill px-3 py-2';
           else profileRoleBadge.className = 'badge bg-success rounded-pill px-3 py-2';
+        }
+
+        if (menuAvatar) menuAvatar.src = userPhotoVal;
+        if (menuName) menuName.textContent = userDisplayName;
+        if (menuEmail) menuEmail.textContent = userEmailVal;
+        if (menuRoleBadge) {
+          if (currentRole === 'ADMIN') {
+            menuRoleBadge.textContent = '🔴 ผู้ดูแลระบบ (Admin)';
+            menuRoleBadge.className = 'badge bg-danger rounded-pill px-2 py-0.5 fs-8 fw-semibold';
+          } else if (currentRole === 'MANAGER') {
+            menuRoleBadge.textContent = '🔵 เจ้าหน้าที่/บริหาร (Manager)';
+            menuRoleBadge.className = 'badge bg-primary rounded-pill px-2 py-0.5 fs-8 fw-semibold';
+          } else {
+            menuRoleBadge.textContent = `🟢 ${rName}`;
+            menuRoleBadge.className = 'badge bg-success rounded-pill px-2 py-0.5 fs-8 fw-semibold';
+          }
         }
 
         const editName = document.getElementById('editProfileNameInput');
@@ -1046,6 +1169,9 @@
 
         const safeName = typeof escapeHtml === 'function' ? escapeHtml(u.displayName || 'ผู้ใช้') : (u.displayName || 'ผู้ใช้');
         const safeEmail = typeof escapeHtml === 'function' ? escapeHtml(u.email || '-') : (u.email || '-');
+        const isSuperAdmin = u.email === 'jaru072@gmail.com' || uRole === 'ADMIN';
+        const hasPersonnel = isSuperAdmin ? true : (u.accessPersonnel !== false);
+        const hasInventory = isSuperAdmin ? true : (u.accessInventory !== false);
 
         return `
           <tr>
@@ -1064,12 +1190,24 @@
               ${timeSubtitle}
             </td>
             <td class="text-center">
-              <select id="userRoleSelect_${u.id}" class="form-select form-select-sm fw-semibold">
+              <select id="userRoleSelect_${u.id}" class="form-select form-select-sm fw-semibold" ${u.email === 'jaru072@gmail.com' ? 'disabled' : ''}>
                 <option value="ADMIN" ${uRole === 'ADMIN' ? 'selected' : ''}>🔴 ผู้ดูแลระบบ (ADMIN)</option>
                 <option value="MANAGER" ${uRole === 'MANAGER' ? 'selected' : ''}>🔵 ผู้จัดการ/บริหาร (MANAGER)</option>
                 <option value="STAFF" ${uRole === 'STAFF' ? 'selected' : ''}>🟣 เจ้าหน้าที่ (STAFF)</option>
                 <option value="WORKER" ${uRole === 'WORKER' ? 'selected' : ''}>🟢 พนักงาน (WORKER)</option>
               </select>
+            </td>
+            <td class="text-center">
+              <div class="d-flex align-items-center justify-content-center gap-2 flex-wrap">
+                <div class="form-check form-switch m-0" title="สิทธิ์เข้าระบบงานบุคคล (HR)">
+                  <input class="form-check-input" type="checkbox" id="userAccPersonnel_${u.id}" ${hasPersonnel ? 'checked' : ''} ${isSuperAdmin ? 'disabled' : ''}>
+                  <label class="form-check-label fs-8 fw-semibold text-primary" for="userAccPersonnel_${u.id}">👥 บุคคล</label>
+                </div>
+                <div class="form-check form-switch m-0" title="สิทธิ์เข้าระบบพัสดุและอุปกรณ์ (Stock & Equipment)">
+                  <input class="form-check-input" type="checkbox" id="userAccInventory_${u.id}" ${hasInventory ? 'checked' : ''} ${isSuperAdmin ? 'disabled' : ''}>
+                  <label class="form-check-label fs-8 fw-semibold text-success" for="userAccInventory_${u.id}">📦 พัสดุฯ</label>
+                </div>
+              </div>
             </td>
             <td class="text-end pe-3">
               <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" onclick="updateFirestoreUserRole('${u.id}')">
@@ -1081,20 +1219,40 @@
       }).join('');
     }
 
-    // Update User Role in Firestore
+    // Update User Role & Module Permissions in Firestore
     window.updateFirestoreUserRole = async function(userId) {
       const selectElem = document.getElementById(`userRoleSelect_${userId}`);
+      const chkPersonnel = document.getElementById(`userAccPersonnel_${userId}`);
+      const chkInventory = document.getElementById(`userAccInventory_${userId}`);
       if (!selectElem || !db) return;
       const newRole = selectElem.value;
+      const isSuperAdmin = newRole === 'ADMIN';
+      const accessPersonnel = isSuperAdmin ? true : (chkPersonnel ? chkPersonnel.checked : true);
+      const accessInventory = isSuperAdmin ? true : (chkInventory ? chkInventory.checked : true);
+
       try {
         const userRef = doc(db, "users", userId);
         await updateDoc(userRef, {
           role: newRole,
+          accessPersonnel: accessPersonnel,
+          accessInventory: accessInventory,
+          modules: [
+            ...(accessPersonnel ? ['personnel'] : []),
+            ...(accessInventory ? ['inventory'] : [])
+          ],
           updatedAt: new Date().toISOString()
         });
-        showToast(`อัปเดตสิทธิ์ผู้ใช้เป็น ${newRole} เรียบร้อยแล้ว`);
+        showToast(`อัปเดตสิทธิ์บทบาทและสิทธิ์เข้าถึงระบบเรียบร้อยแล้ว`);
         if (currentAuthUser && currentAuthUser.uid === userId) {
+          if (currentUserProfile) {
+            currentUserProfile.role = newRole;
+            currentUserProfile.accessPersonnel = accessPersonnel;
+            currentUserProfile.accessInventory = accessInventory;
+          }
           setRole(newRole);
+          if (typeof window.checkModuleAccess === 'function') {
+            window.checkModuleAccess('inventory');
+          }
         }
       } catch (err) {
         showToast(`อัปเดตสิทธิ์ไม่สำเร็จ: ${err.message}`);

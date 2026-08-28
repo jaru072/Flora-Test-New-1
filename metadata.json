@@ -1,6 +1,6 @@
 {
   "name": "Flora Garden Test",
-  "description": "Web App Flora Garden Test for Programer",
+  "description": "ระบบบริหารงานบุคคล และระบบพัสดุและอุปกรณ์ โครงการทุ่งสวรรค์ ตะวันฉาย",
   "requestFramePermissions": [
     "camera"
   ],

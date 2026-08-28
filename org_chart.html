@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ผังโครงสร้างบุคลากร - โครงการรัตนบุปผา และผลิตดอกไม้ธรรมยาตรา</title>
+  <title>ระบบงานบุคคลและผังองค์กร - โครงการทุ่งสวรรค์ ตะวันฉาย</title>
   
   <!-- App Icons -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -992,72 +992,88 @@
 <body>
 
   <!-- ==================== SINGLE TOP NAVBAR ==================== -->
-  <header class="top-control-bar d-flex align-items-center justify-content-between text-white flex-wrap gap-2 no-print">
-    <!-- Left: Clickable Sunflower Brand Logo & Menu Link -->
-    <div class="d-flex align-items-center">
-      <a href="index.html" onclick="event.preventDefault(); handleGoBackToMain();" class="d-flex align-items-center gap-2 text-decoration-none text-white brand-logo-btn" title="คลิกเพื่อกลับสู่หน้าหลัก">
-        <div class="d-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded-circle shadow-sm overflow-hidden" data-flora-logo="navbar" data-logo-size="32" style="width: 32px; height: 32px;">
+  <header class="top-control-bar d-flex align-items-center justify-content-between text-white flex-wrap gap-2 no-print" style="background: rgba(15, 23, 42, 0.98); border-bottom: 1px solid rgba(59, 130, 246, 0.35); padding: 0.5rem 1rem;">
+    <!-- Left: Master Sunflower Brand Logo + Module Badge -->
+    <div class="d-flex align-items-center gap-2.5 flex-wrap">
+      <a href="#" onclick="event.preventDefault(); if(typeof openGlobalLogoModal === 'function') openGlobalLogoModal();" class="d-flex align-items-center gap-2 text-decoration-none text-white brand-logo-btn" title="คลิกเพื่อจัดการโลโก้องค์กร">
+        <div class="d-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded-circle shadow-sm overflow-hidden flex-shrink-0" data-flora-logo="navbar" data-logo-size="32" style="width: 32px; height: 32px;">
           <i class="bi bi-flower1 fs-5 text-warning"></i>
         </div>
-        <span class="fw-bold fs-6 tracking-wide text-warning">หน้าหลัก</span>
+        <div class="d-flex flex-column">
+          <span class="fw-bold fs-6 tracking-wide text-white d-block lh-1">โครงการทุ่งสวรรค์ ตะวันฉาย</span>
+        </div>
       </a>
     </div>
 
-    <!-- Center & Right: Navigation Tabs + Export Menu -->
-    <nav class="workspace-tabs d-flex align-items-center gap-2 flex-wrap m-0 p-0" aria-label="เลือกหน้าจัดการผัง">
-      <button type="button" id="tabOrgChart" class="workspace-tab-btn active" onclick="switchWorkspaceTab('org')"><i class="bi bi-diagram-3-fill me-1"></i> ผังองค์กร</button>
-      <button type="button" id="tabPersonnelDirectory" class="workspace-tab-btn" onclick="switchWorkspaceTab('directory')"><i class="bi bi-people-fill me-1"></i> ระบบบุคลากร</button>
-      <button type="button" id="tabTreeManager" class="workspace-tab-btn" onclick="switchWorkspaceTab('tree')"><i class="bi bi-diagram-2-fill me-1"></i> จัดการโครงสร้าง</button>
-      <button type="button" id="tabPersonnelAttendance" class="workspace-tab-btn" onclick="switchWorkspaceTab('attendance')"><i class="bi bi-clock-history me-1"></i> ลงเวลา / การลา</button>
+    <!-- Central System Switcher Dropdown (หรูหรา เด่นชัด แสดงสถานะระบบปัจจุบัน) -->
+    <div class="dropdown mx-auto my-1" id="orgNavSystemSwitcherDropdown">
+      <button class="btn btn-sm rounded-pill px-3.5 py-1.5 fw-bold shadow-sm dropdown-toggle d-flex align-items-center gap-2 border hover-scale" type="button" id="orgSystemSwitcherBtn" data-bs-toggle="dropdown" aria-expanded="false" style="background: rgba(37, 99, 235, 0.28); border-color: rgba(96, 165, 250, 0.6); color: #eff6ff;" title="คลิกเพื่อสลับระบบงาน">
+        <span class="p-1 bg-primary rounded-circle shadow-xs animate-pulse"></span>
+        <i class="bi bi-people-fill text-warning fs-6"></i>
+        <span class="fs-7 fw-bold text-white">ระบบงานบุคคล</span>
+      </button>
 
-      <!-- Consolidated Export & Print Dropdown Menu -->
-      <div class="dropdown" id="orgExportMenuWrap">
-        <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-bold dropdown-toggle d-flex align-items-center gap-1.5 shadow-sm" type="button" id="dropdownExportMenu" data-bs-toggle="dropdown" aria-expanded="false" title="ส่งออกหรือพิมพ์ผังโครงสร้าง">
-          <i class="bi bi-box-arrow-up-right fs-6 text-warning"></i>
-          <span>ส่งออก / พิมพ์ผัง</span>
+      <ul class="dropdown-menu dropdown-menu-center shadow-lg border-0 rounded-4 mt-2 p-1.5" style="min-width: 220px; background: #ffffff;" aria-labelledby="orgSystemSwitcherBtn">
+        <li>
+          <a class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 rounded-3 text-dark fw-semibold" href="index.html">
+            <i class="bi bi-box-seam-fill fs-6 text-success"></i>
+            <span class="fs-7">ระบบพัสดุและอุปกรณ์</span>
+          </a>
+        </li>
+        <li class="mt-1">
+          <a class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 rounded-3 active bg-primary bg-opacity-10 text-primary fw-bold" href="org_chart.html">
+            <i class="bi bi-people-fill fs-6 text-primary"></i>
+            <span class="fs-7">ระบบงานบุคคล</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Right: Navigation and Profile Controls -->
+    <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+      <!-- Back / Forward Navigation Buttons (◀ ย้อนกลับ  ▶ ถัดไป) -->
+      <div class="btn-group shadow-sm me-1" role="group" aria-label="นำทางย้อนกลับและถัดไป">
+        <button type="button" class="btn btn-outline-light btn-sm rounded-start-pill px-2.5 py-1 fw-bold d-flex align-items-center gap-1" id="orgNavBtnBack" onclick="window.history.back()" title="ย้อนกลับ">
+          <span class="fs-8">◀ ย้อนกลับ</span>
         </button>
-        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3 mt-1 py-2" aria-labelledby="dropdownExportMenu">
+        <button type="button" class="btn btn-outline-light btn-sm rounded-end-pill px-2.5 py-1 fw-bold d-flex align-items-center gap-1" id="orgNavBtnForward" onclick="window.history.forward()" title="ถัดไป">
+          <span class="fs-8">▶ ถัดไป</span>
+        </button>
+      </div>
+
+      <div class="dropdown" id="orgSettingsDropdown">
+        <button class="btn btn-outline-light btn-sm rounded-pill px-2.5 py-1 fw-semibold dropdown-toggle d-flex align-items-center gap-1.5 shadow-sm" type="button" id="dropdownOrgSettingsMenu" data-bs-toggle="dropdown" aria-expanded="false" title="บัญชีผู้ใช้และการตั้งค่า">
+          <img id="orgNavUserAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80" class="rounded-circle border border-light shadow-xs" style="width: 22px; height: 22px; object-fit: cover;" />
+          <span class="fs-8 fw-bold font-monospace" id="orgNavRoleText" style="max-width: 50px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">User</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2" style="min-width: 240px;" aria-labelledby="dropdownOrgSettingsMenu">
+          <!-- 1. จัดการบัญชี & สิทธิ์ผู้ใช้ -->
           <li>
-            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="downloadPosterPDF()" id="btnDownloadPdf">
-              <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
-              <div>
-                <div class="fw-bold fs-7">ส่งออกเป็น PDF (Vector)</div>
-                <small class="text-muted fs-8">เอกสารความละเอียดสูง เหมาะสำหรับเปิดดู/พิมพ์ A3, A4</small>
-              </div>
+            <a href="index.html" class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 fw-semibold text-decoration-none">
+              <i class="bi bi-person-gear text-primary fs-5"></i>
+              <span class="fs-7 text-dark">จัดการบัญชี & สิทธิ์ผู้ใช้</span>
+            </a>
+          </li>
+
+          <!-- 2. สำรอง / กู้คืนข้อมูล (ผังและระบบ) -->
+          <li>
+            <button type="button" class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 fw-semibold text-primary" onclick="if(typeof downloadPosterPDF === 'function') downloadPosterPDF();">
+              <i class="bi bi-cloud-arrow-down-fill text-primary fs-5"></i>
+              <span class="fs-7">สำรอง / กู้คืนข้อมูล</span>
             </button>
           </li>
-          <li>
-            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="downloadPosterPNG()" id="btnDownloadPng">
-              <i class="bi bi-file-earmark-image-fill text-success fs-5"></i>
-              <div>
-                <div class="fw-bold fs-7">บันทึกรูปภาพ HD (PNG)</div>
-                <small class="text-muted fs-8">ภาพความละเอียดสูง สำหรับงานนำเสนอและส่งต่อ</small>
-              </div>
-            </button>
-          </li>
+
+          <!-- 3. ออกจากระบบ -->
           <li><hr class="dropdown-divider my-1"></li>
           <li>
-            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="window.print()">
-              <i class="bi bi-printer-fill text-primary fs-5"></i>
-              <div>
-                <div class="fw-bold fs-7">สั่งพิมพ์ผังโครงสร้าง (Print)</div>
-                <small class="text-muted fs-8">พิมพ์ออกเครื่องพิมพ์โดยตรงตามขนาดกระดาษ</small>
-              </div>
-            </button>
-          </li>
-          <li><hr class="dropdown-divider my-1"></li>
-          <li>
-            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="openGlobalLogoModal()">
-              <i class="bi bi-flower1 text-warning fs-5"></i>
-              <div>
-                <div class="fw-bold fs-7 text-dark">จัดการโลโก้องค์กร / โครงการ</div>
-                <small class="text-muted fs-8">เปลี่ยนโลโก้ 2 มุมบนและเมนูหลัก หรือใช้ดอกทานตะวัน</small>
-              </div>
+            <button type="button" class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 fw-semibold text-danger" onclick="if(typeof handlePersonnelSignOut === 'function') handlePersonnelSignOut(); else window.location.href='index.html';">
+              <i class="bi bi-box-arrow-right fs-5"></i>
+              <span class="fs-7 text-danger">ออกจากระบบ</span>
             </button>
           </li>
         </ul>
       </div>
-    </nav>
+    </div>
   </header>
 
   <!-- ==================== SECONDARY TOOLBAR & CONTROLS ==================== -->
@@ -1094,10 +1110,95 @@
         </span>
       </div>
 
+      <!-- เมนูระบบ Dropdown (ผังองค์กร, สารบรรณ, โครงสร้าง, เวลา/การลา, ส่งออก/พิมพ์) -->
+      <div class="dropdown" id="personnelSystemMenuWrap">
+        <button class="btn btn-primary btn-sm rounded-pill px-3 py-1 fw-bold shadow-sm dropdown-toggle d-flex align-items-center gap-1.5" type="button" id="dropdownPersonnelSystemMenu" data-bs-toggle="dropdown" aria-expanded="false" title="เมนูระบบงานบุคคล">
+          <i class="bi bi-grid-fill fs-7 text-warning"></i>
+          <span id="currentSystemMenuLabel">ผังองค์กร</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 mt-2 py-2" style="min-width: 260px;" aria-labelledby="dropdownPersonnelSystemMenu">
+          <li><span class="dropdown-header text-uppercase fs-9 fw-bold text-muted px-3">เมนูระบบงานบุคคล</span></li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 fw-semibold active rounded-2 mx-1" type="button" id="tabOrgChart" onclick="switchWorkspaceTab('org')">
+              <i class="bi bi-diagram-3-fill text-primary fs-5"></i>
+              <div>
+                <div class="fs-7 text-dark fw-bold">ผังองค์กร</div>
+                <small class="text-muted fw-normal fs-9">แผนผังบุคลากรโครงสร้าง</small>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 fw-semibold rounded-2 mx-1 mt-1" type="button" id="tabPersonnelDirectory" onclick="switchWorkspaceTab('directory')">
+              <i class="bi bi-people-fill text-success fs-5"></i>
+              <div>
+                <div class="fs-7 text-dark fw-bold">สารบรรณ</div>
+                <small class="text-muted fw-normal fs-9">สารบบบุคลากร พิมพ์บัตร QR</small>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 fw-semibold rounded-2 mx-1 mt-1" type="button" id="tabTreeManager" onclick="switchWorkspaceTab('tree')">
+              <i class="bi bi-diagram-2-fill text-info fs-5"></i>
+              <div>
+                <div class="fs-7 text-dark fw-bold">โครงสร้าง</div>
+                <small class="text-muted fw-normal fs-9">จัดการโหนดแผนกและตำแหน่ง</small>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5 fw-semibold rounded-2 mx-1 mt-1" type="button" id="tabPersonnelAttendance" onclick="switchWorkspaceTab('attendance')">
+              <i class="bi bi-clock-history text-warning fs-5"></i>
+              <div>
+                <div class="fs-7 text-dark fw-bold">เวลา/การลา</div>
+                <small class="text-muted fw-normal fs-9">บันทึกเวลาทำงานและการลา</small>
+              </div>
+            </button>
+          </li>
+          <li><hr class="dropdown-divider my-2"></li>
+          <li><span class="dropdown-header text-uppercase fs-9 fw-bold text-muted px-3">ส่งออก / พิมพ์</span></li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="downloadPosterPDF()" id="btnDownloadPdf">
+              <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
+              <div>
+                <div class="fw-bold fs-7 text-dark">ส่งออกเป็น PDF (Vector)</div>
+                <small class="text-muted fs-9">เอกสารพิมพ์ A3, A4</small>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="downloadPosterPNG()" id="btnDownloadPng">
+              <i class="bi bi-file-earmark-image-fill text-success fs-5"></i>
+              <div>
+                <div class="fw-bold fs-7 text-dark">บันทึกรูปภาพ HD (PNG)</div>
+                <small class="text-muted fs-9">ภาพความละเอียดสูง</small>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="window.print()">
+              <i class="bi bi-printer-fill text-primary fs-5"></i>
+              <div>
+                <div class="fw-bold fs-7 text-dark">สั่งพิมพ์ผัง (Print)</div>
+                <small class="text-muted fs-9">พิมพ์ออกเครื่องพิมพ์โดยตรง</small>
+              </div>
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="openGlobalLogoModal()">
+              <i class="bi bi-flower1 text-warning fs-5"></i>
+              <div>
+                <div class="fw-bold fs-7 text-dark">จัดการโลโก้องค์กร</div>
+                <small class="text-muted fs-9">เปลี่ยนโลโก้โครงการ</small>
+              </div>
+            </button>
+          </li>
+        </ul>
+      </div>
+
       <!-- Deleted Personnel / Trash Button -->
       <button type="button" id="btnOrgTrash" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 py-1 fw-semibold shadow-sm personnel-admin-only d-flex align-items-center gap-1 text-nowrap flex-shrink-0" onclick="window.openPersonnelTrash ? window.openPersonnelTrash() : null" title="บุคลากรที่ลบแล้ว (สามารถกู้คืนหรือลบถาวรได้)">
         <i class="bi bi-trash3-fill fs-6 text-danger"></i>
-        <span>บุคลากรที่ลบแล้ว</span>
+        <span>บุคลากร</span>
         <span id="orgPersonnelTrashBadge" class="badge bg-danger text-white rounded-pill ms-1">0</span>
       </button>
 
@@ -1791,6 +1892,267 @@
     </button>
   </div>
 
+  <!-- ==================== MODAL: MODULE ACCESS RESTRICTION ==================== -->
+  <div class="modal fade" id="moduleAccessDeniedModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden text-center">
+        <div class="modal-header border-0 p-4 pb-0 justify-content-center">
+          <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 70px; height: 70px; background: #fef2f2; color: #dc2626;">
+            <i class="bi bi-shield-x display-5"></i>
+          </div>
+        </div>
+        <div class="modal-body p-4 pt-3">
+          <h5 class="fw-bold text-dark mb-2">การเข้าถึงระบบถูกจำกัด</h5>
+          <p class="text-muted fs-7 mb-3" id="moduleAccessDeniedMessage">
+            ขออภัย บัญชีของคุณยังไม่ได้รับสิทธิ์เข้าใช้งาน <strong class="text-dark">"ระบบงานบุคคล"</strong><br>
+            กรุณาติดต่อผู้ดูแลระบบเพื่อขอเปิดสิทธิ์การใช้งาน
+          </p>
+          <div class="alert alert-light border rounded-3 p-2.5 text-start fs-8 mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-person-badge text-primary fs-5"></i>
+            <div class="lh-sm">
+              <span class="fw-bold d-block text-dark" id="moduleDeniedUserName">ผู้ใช้งาน</span>
+              <span class="text-muted font-monospace" id="moduleDeniedUserEmail">-</span>
+            </div>
+          </div>
+          <div class="d-flex flex-column gap-2">
+            <a href="index.html" id="btnSwitchToAllowedInventory" class="btn btn-success rounded-pill fw-bold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-box-seam-fill"></i>
+              <span>สลับไปยังระบบพัสดุและอุปกรณ์</span>
+              <i class="bi bi-arrow-right"></i>
+            </a>
+            <a href="index.html" class="btn btn-outline-danger rounded-pill fw-semibold py-2 d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-box-arrow-right"></i>
+              <span>กลับสู่หน้าหลัก / สลับบัญชี</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== PERSONNEL SYSTEM BACKUP & RESTORE MODAL ==================== -->
+  <div class="modal fade" id="personnelBackupRestoreModal" tabindex="-1" aria-labelledby="personnelBackupRestoreModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <!-- Header -->
+        <div class="modal-header bg-gradient bg-primary text-white border-0 py-3 px-4 d-flex align-items-center justify-content-between">
+          <div class="d-flex align-items-center gap-3">
+            <div class="bg-white text-primary rounded-circle p-2.5 d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px;">
+              <i class="bi bi-database-fill-gear fs-4"></i>
+            </div>
+            <div>
+              <h5 class="modal-title fw-bold mb-0" id="personnelBackupRestoreModalLabel">สำรองและกู้คืนระบบงานบุคคลทั้งหมด</h5>
+              <small class="text-white-50">Personnel System & Org Chart Complete Backup / Restore</small>
+            </div>
+          </div>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-4 bg-light">
+          <!-- Live System Summary Stats Grid -->
+          <div class="card border-0 shadow-2xs rounded-3 p-3 mb-4 bg-white">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <span class="fw-bold text-dark fs-7 d-flex align-items-center gap-1.5">
+                <i class="bi bi-pie-chart-fill text-primary"></i> สถานะข้อมูลในระบบงานบุคคลปัจจุบัน (Live Summary)
+              </span>
+              <button class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-0.5 fs-8" onclick="refreshPersonnelBackupModalStats()">
+                <i class="bi bi-arrow-clockwise me-1"></i>รีเฟรชยอด
+              </button>
+            </div>
+            <div class="row g-2 text-center fs-8">
+              <div class="col-6 col-md-3">
+                <div class="p-2 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25">
+                  <div class="text-muted fs-9">👥 บุคลากรทั้งหมด</div>
+                  <strong class="text-success fs-6" id="personnelStatCountEmp">0 คน</strong>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="p-2 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25">
+                  <div class="text-muted fs-9">🏛️ แผนก/สายงาน</div>
+                  <strong class="text-primary fs-6" id="personnelStatCountDept">0 แผนก</strong>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="p-2 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25">
+                  <div class="text-muted fs-9">💼 ตำแหน่งงาน</div>
+                  <strong class="text-secondary fs-6" id="personnelStatCountPos">0 ตำแหน่ง</strong>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="p-2 rounded-3 bg-warning bg-opacity-10 border border-warning border-opacity-25">
+                  <div class="text-muted fs-9">🌳 โครงสร้างผังองค์กร</div>
+                  <strong class="text-warning-emphasis fs-6" id="personnelStatCountTree">0 โหนด</strong>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="p-2 rounded-3 bg-info bg-opacity-10 border border-info border-opacity-25">
+                  <div class="text-muted fs-9">⏰ บันทึกเวลา/การลา</div>
+                  <strong class="text-info-emphasis fs-6" id="personnelStatCountAtt">0 รายการ</strong>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="p-2 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-25">
+                  <div class="text-muted fs-9">🗑️ บุคลากรในถังขยะ</div>
+                  <strong class="text-danger fs-6" id="personnelStatCountTrash">0 คน</strong>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="p-2 rounded-3 bg-purple bg-opacity-10 border border-purple border-opacity-25">
+                  <div class="text-muted fs-9">🖼️ รูปถ่ายบุคลากร</div>
+                  <strong class="text-purple fs-6" id="personnelStatCountPhoto">0 รูป</strong>
+                </div>
+              </div>
+              <div class="col-6 col-md-3">
+                <div class="p-2 rounded-3 bg-dark bg-opacity-10 border border-dark border-opacity-25">
+                  <div class="text-muted fs-9">☁️ Cloud Firestore</div>
+                  <strong class="text-success fs-6"><i class="bi bi-cloud-check-fill me-1"></i>เชื่อมต่อแล้ว</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress Bar and Timer Container -->
+          <div id="personnelBackupProgressContainer" class="card border-0 shadow-sm rounded-4 p-3.5 mb-4 bg-white d-none">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="d-flex align-items-center gap-2">
+                <div class="spinner-border spinner-border-sm text-primary" id="personnelBackupProgressSpinner" role="status"></div>
+                <span class="fw-bold fs-7 text-dark" id="personnelBackupProgressTitle">กำลังประมวลผล...</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span id="personnelBackupProgressTimerBadge" class="badge bg-danger text-white rounded-pill px-3 py-1 fs-7 fw-bold d-flex align-items-center gap-1.5 shadow-2xs">
+                  <i class="bi bi-stopwatch text-white" id="personnelBackupProgressTimerIcon"></i>
+                  <span id="personnelBackupProgressTimer">00:00</span>
+                </span>
+                <span class="badge bg-primary text-white rounded-pill px-3 py-1 fs-7 fw-bold" id="personnelBackupProgressPercent">0%</span>
+              </div>
+            </div>
+            <div class="progress rounded-pill mb-2" style="height: 14px;">
+              <div id="personnelBackupProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 0%"></div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center fs-8 text-muted">
+              <span id="personnelBackupProgressText">เตรียมความพร้อม...</span>
+              <span id="personnelBackupProgressSubStatus"></span>
+            </div>
+          </div>
+
+          <div class="row g-4">
+            <!-- Left Column: Backup Actions -->
+            <div class="col-12 col-lg-6">
+              <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white h-100">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <div class="bg-success text-white p-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+                    <i class="bi bi-cloud-arrow-down-fill"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-0 text-success">1. สำรองข้อมูล (Backup)</h6>
+                    <small class="text-muted fs-9">บันทึกทุกข้อมูลระบบบุคคลและผังองค์กรลงเครื่อง</small>
+                  </div>
+                </div>
+
+                <div class="d-flex flex-column gap-2.5">
+                  <!-- Backup JSON Button -->
+                  <button type="button" class="btn btn-outline-success p-3 rounded-3 text-start d-flex align-items-center justify-content-between hover-shadow transition" onclick="downloadPersonnelBackupJSON()">
+                    <div class="d-flex align-items-center gap-3">
+                      <i class="bi bi-file-earmark-code-fill text-success fs-3"></i>
+                      <div>
+                        <strong class="d-block text-dark fs-7">สำรองข้อมูลทั้งหมดเป็น JSON</strong>
+                        <span class="text-muted fs-8">รวมสารบบ, ผังองค์กร, แผนก, ตำแหน่ง, เวลาเข้า-ออก, รูปภาพ</span>
+                      </div>
+                    </div>
+                    <i class="bi bi-download fs-5 text-success"></i>
+                  </button>
+
+                  <!-- Backup ZIP Package Button -->
+                  <button type="button" class="btn btn-outline-primary p-3 rounded-3 text-start d-flex align-items-center justify-content-between hover-shadow transition" onclick="downloadPersonnelBackupZIP()">
+                    <div class="d-flex align-items-center gap-3">
+                      <i class="bi bi-file-earmark-zip-fill text-primary fs-3"></i>
+                      <div>
+                        <strong class="d-block text-dark fs-7">ดาวน์โหลดแพ็กเกจ ZIP ครบชุด</strong>
+                        <span class="text-muted fs-8">ไฟล์บีบอัด .zip พร้อมข้อมูลและเมตาเดตาสำหรับเก็บถาวร</span>
+                      </div>
+                    </div>
+                    <i class="bi bi-file-zip-fill fs-5 text-primary"></i>
+                  </button>
+
+                  <!-- Force Sync from Firestore Button -->
+                  <button type="button" class="btn btn-outline-info p-3 rounded-3 text-start d-flex align-items-center justify-content-between hover-shadow transition" onclick="syncPersonnelFromCloudFirestore()">
+                    <div class="d-flex align-items-center gap-3">
+                      <i class="bi bi-cloud-check-fill text-info fs-3"></i>
+                      <div>
+                        <strong class="d-block text-dark fs-7">ดึง/ซิงค์ข้อมูลสดจาก Cloud Firestore</strong>
+                        <span class="text-muted fs-8">อัปเดตข้อมูลบุคลากรและผังองค์กรให้เป็นปัจจุบันล่าสุด</span>
+                      </div>
+                    </div>
+                    <i class="bi bi-arrow-repeat fs-5 text-info"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Restore Actions -->
+            <div class="col-12 col-lg-6">
+              <div class="card border-0 shadow-sm rounded-4 p-3.5 bg-white h-100">
+                <div class="d-flex align-items-center gap-2 mb-3">
+                  <div class="bg-danger text-white p-2 rounded-circle d-flex align-items-center justify-content-center" style="width: 34px; height: 34px;">
+                    <i class="bi bi-cloud-arrow-up-fill"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-0 text-danger">2. กู้คืนข้อมูล (Restore)</h6>
+                    <small class="text-muted fs-9">นำเข้าไฟล์สำรอง (.json หรือ .zip) กลับเข้าสู่ระบบ</small>
+                  </div>
+                </div>
+
+                <!-- File Drop Zone -->
+                <div class="p-3 border-2 border-dashed rounded-3 bg-light text-center mb-3" style="cursor: pointer;" onclick="document.getElementById('personnelRestoreFileInput').click()">
+                  <input type="file" id="personnelRestoreFileInput" accept=".json,.zip" class="d-none" onchange="handlePersonnelRestoreFileSelected(event)">
+                  <i class="bi bi-cloud-upload-fill fs-2 text-secondary mb-1 d-block"></i>
+                  <strong class="d-block text-dark fs-7">คลิกเพื่อเลือกไฟล์ หรือลากไฟล์มาวางที่นี่</strong>
+                  <span class="text-muted fs-9">รองรับไฟล์ .json หรือ .zip ที่สำรองจากระบบ Flora Garden</span>
+                </div>
+
+                <!-- Restore Preview Card -->
+                <div id="personnelRestorePreviewCard" class="card border border-warning bg-warning bg-opacity-10 rounded-3 p-3 mb-3 d-none">
+                  <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="fw-bold text-dark fs-8 d-flex align-items-center gap-1">
+                      <i class="bi bi-file-earmark-check-fill text-warning"></i> สรุปข้อมูลในไฟล์: <span id="personnelRestoreFileName" class="text-primary font-monospace">file.json</span>
+                    </span>
+                    <span class="badge bg-success text-white px-2 py-0.5 fs-9">พร้อมกู้คืน</span>
+                  </div>
+                  <div id="personnelRestoreSummaryDetails" class="row g-1 fs-9 text-dark"></div>
+
+                  <!-- Restore Mode Options -->
+                  <div class="mt-3 pt-2 border-top border-warning border-opacity-25">
+                    <label class="form-label fw-bold text-dark fs-8 mb-1.5">รูปแบบการกู้คืน:</label>
+                    <div class="d-flex gap-3 fs-8">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="personnelRestoreMode" id="personnelRestoreReplace" value="REPLACE" checked>
+                        <label class="form-check-label text-dark fw-semibold" for="personnelRestoreReplace">เขียนทับทั้งหมด (Replace)</label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="personnelRestoreMode" id="personnelRestoreMerge" value="MERGE">
+                        <label class="form-check-label text-dark fw-semibold" for="personnelRestoreMerge">รวมข้อมูล (Merge)</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Execute Restore Button -->
+                <button type="button" id="btnExecutePersonnelRestore" class="btn btn-danger w-100 rounded-pill py-2.5 fw-bold shadow-sm d-none" onclick="executePersonnelRestoreDatabase()">
+                  <i class="bi bi-arrow-counterclockwise me-1.5"></i> ยืนยันเริ่มต้นกู้คืนข้อมูล (Execute Restore)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer bg-light border-0 py-2.5 px-4 d-flex justify-content-between">
+          <small class="text-muted"><i class="bi bi-shield-lock-fill text-success me-1"></i>ระบบมีการตรวจสอบความถูกต้องก่อนเขียนฐานข้อมูลจริง</small>
+          <button type="button" class="btn btn-secondary rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">ปิดหน้าต่าง</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Alert Box -->
   <div id="orgToastContainer"></div>
 
@@ -1798,8 +2160,10 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script type="module" src="/global_logo.js"></script>
+  <script type="module" src="personnel_backup_restore.js"></script>
   <script type="module" src="personnel_tools.js"></script>
   <script type="module" src="org_tree.js"></script>
 
@@ -1818,7 +2182,7 @@
       onSnapshot 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
     import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
     // Application Global State
     window.employees = [];
@@ -1933,20 +2297,84 @@
           window.floraLogo.connectGlobalLogoFirestore(window.personnelApi);
         }
         window.dispatchEvent(new CustomEvent('flora-personnel-api-ready'));
+        window.checkOrgModuleAccess = function(access) {
+          const isSuperAdmin = access?.isAdmin === true || access?.role === 'ADMIN' || access?.email === 'jaru072@gmail.com';
+          if (isSuperAdmin) {
+            const modalElem = document.getElementById('moduleAccessDeniedModal');
+            if (modalElem && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              const bsModal = bootstrap.Modal.getInstance(modalElem);
+              if (bsModal) bsModal.hide();
+            }
+            return true;
+          }
+
+          if (!access || access.loading) return true;
+
+          const hasPersonnel = access.accessPersonnel !== false;
+          const hasInventory = access.accessInventory !== false;
+
+          if (!hasPersonnel) {
+            const modalElem = document.getElementById('moduleAccessDeniedModal');
+            if (modalElem && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              const nameElem = document.getElementById('moduleDeniedUserName');
+              const emailElem = document.getElementById('moduleDeniedUserEmail');
+              const switchBtn = document.getElementById('btnSwitchToAllowedInventory');
+              if (nameElem) nameElem.textContent = access.displayName || access.email?.split('@')[0] || 'ผู้ใช้งาน';
+              if (emailElem) emailElem.textContent = access.email || '-';
+              if (switchBtn) {
+                if (hasInventory) {
+                  switchBtn.classList.remove('d-none');
+                } else {
+                  switchBtn.classList.add('d-none');
+                }
+              }
+              const bsModal = bootstrap.Modal.getOrCreateInstance(modalElem);
+              bsModal.show();
+            }
+            return false;
+          } else {
+            const modalElem = document.getElementById('moduleAccessDeniedModal');
+            if (modalElem && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+              const bsModal = bootstrap.Modal.getInstance(modalElem);
+              if (bsModal) bsModal.hide();
+            }
+          }
+          return true;
+        };
+
         onAuthStateChanged(window.personnelAuth, async (user) => {
           let access = !user && personnelSessionAccess?.isAdmin === true && personnelSessionAccess?.email === 'jaru072@gmail.com'
-            ? { loading: false, isAdmin: true, uid: personnelSessionAccess.uid || '', email: personnelSessionAccess.email, role: 'ADMIN' }
-            : { loading: false, isAdmin: false, uid: user?.uid || personnelSessionAccess?.uid || '', email: user?.email || personnelSessionAccess?.email || '', role: user ? 'VIEWER' : (personnelSessionAccess?.role || 'VIEWER') };
+            ? { loading: false, isAdmin: true, uid: personnelSessionAccess.uid || '', email: personnelSessionAccess.email, role: 'ADMIN', accessPersonnel: true, accessInventory: true }
+            : { 
+                loading: false, 
+                isAdmin: false, 
+                uid: user?.uid || personnelSessionAccess?.uid || '', 
+                email: user?.email || personnelSessionAccess?.email || '', 
+                role: user ? 'VIEWER' : (personnelSessionAccess?.role || 'VIEWER'),
+                accessPersonnel: personnelSessionAccess?.accessPersonnel !== undefined ? personnelSessionAccess.accessPersonnel : true,
+                accessInventory: personnelSessionAccess?.accessInventory !== undefined ? personnelSessionAccess.accessInventory : true
+              };
           if (user) {
             const email = String(user.email || '').trim().toLowerCase();
             if (email === 'jaru072@gmail.com') {
-              access = { ...access, isAdmin: true, role: 'ADMIN' };
+              access = { ...access, isAdmin: true, role: 'ADMIN', accessPersonnel: true, accessInventory: true, displayName: user.displayName || 'ผู้ดูแลระบบ', photoURL: user.photoURL || '' };
             } else {
               try {
                 const userSnap = await getDoc(doc(window.db, 'users', user.uid));
                 const profile = userSnap.exists() ? userSnap.data() : {};
                 const role = String(profile.role || '').toUpperCase();
-                access = { ...access, isAdmin: role === 'ADMIN' || profile.isAdmin === true, role: role || 'VIEWER' };
+                const isSuperAdmin = role === 'ADMIN' || profile.isAdmin === true;
+                const accessPersonnel = isSuperAdmin ? true : (profile.accessPersonnel !== undefined ? Boolean(profile.accessPersonnel) : true);
+                const accessInventory = isSuperAdmin ? true : (profile.accessInventory !== undefined ? Boolean(profile.accessInventory) : true);
+                access = { 
+                  ...access, 
+                  isAdmin: isSuperAdmin, 
+                  role: role || 'VIEWER',
+                  accessPersonnel: accessPersonnel,
+                  accessInventory: accessInventory,
+                  displayName: profile.displayName || user.displayName || 'ผู้ใช้งาน',
+                  photoURL: profile.photoURL || user.photoURL || ''
+                };
               } catch (authError) {
                 console.warn('Unable to verify personnel admin profile:', authError);
               }
@@ -1954,7 +2382,60 @@
           }
           window.personnelAccess = access;
           window.dispatchEvent(new CustomEvent('flora-personnel-auth-changed', { detail: access }));
+          
+          // Update Settings Dropdown Header Profile
+          const navAvatar = document.getElementById('orgNavUserAvatar');
+          const navRoleText = document.getElementById('orgNavRoleText');
+          const menuAvatar = document.getElementById('orgMenuUserAvatar');
+          const menuName = document.getElementById('orgMenuUserName');
+          const menuEmail = document.getElementById('orgMenuUserEmail');
+          const menuRoleBadge = document.getElementById('orgMenuUserRoleBadge');
+
+          const userDisplayName = access.displayName || access.email?.split('@')[0] || 'ผู้ใช้งาน';
+          const userEmailVal = access.email || '-';
+          const userPhotoVal = access.photoURL || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80';
+          const isSuperAdmin = access.isAdmin === true || access.role === 'ADMIN';
+
+          if (navAvatar) {
+            navAvatar.src = userPhotoVal;
+            navAvatar.classList.remove('d-none');
+          }
+          if (navRoleText) {
+            navRoleText.textContent = isSuperAdmin ? 'ผู้ดูแลระบบ' : (access.role === 'MANAGER' ? 'เจ้าหน้าที่' : 'ตั้งค่า');
+          }
+          if (menuAvatar) menuAvatar.src = userPhotoVal;
+          if (menuName) menuName.textContent = userDisplayName;
+          if (menuEmail) menuEmail.textContent = userEmailVal;
+          if (menuRoleBadge) {
+            if (isSuperAdmin) {
+              menuRoleBadge.textContent = '🔴 ผู้ดูแลระบบ (Admin)';
+              menuRoleBadge.className = 'badge bg-danger rounded-pill px-2 py-0.5 fs-8 fw-semibold';
+            } else if (access.role === 'MANAGER') {
+              menuRoleBadge.textContent = '🔵 เจ้าหน้าที่ (Manager)';
+              menuRoleBadge.className = 'badge bg-primary rounded-pill px-2 py-0.5 fs-8 fw-semibold';
+            } else {
+              menuRoleBadge.textContent = '🟢 สมาชิก/ผู้ใช้ทั่วไป';
+              menuRoleBadge.className = 'badge bg-success rounded-pill px-2 py-0.5 fs-8 fw-semibold';
+            }
+          }
+
+          if (typeof window.checkOrgModuleAccess === 'function') {
+            window.checkOrgModuleAccess(access);
+          }
         });
+
+        // Global Sign Out handler for Personnel Page
+        window.handlePersonnelSignOut = async function() {
+          try {
+            sessionStorage.clear();
+            if (window.personnelAuth) {
+              await signOut(window.personnelAuth);
+            }
+          } catch(e) {
+            console.warn("Personnel sign out error:", e);
+          }
+          window.location.href = 'index.html';
+        };
         if (typeof window.connectOrgTreeFirestore === 'function') window.connectOrgTreeFirestore({ db: window.db, doc, setDoc, onSnapshot });
         if (typeof window.floraLogo?.connectGlobalLogoFirestore === 'function') window.floraLogo.connectGlobalLogoFirestore({ db: window.db, doc, setDoc, onSnapshot, getDoc, getDocs, collection, deleteDoc });
 
