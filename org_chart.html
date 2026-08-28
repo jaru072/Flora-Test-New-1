@@ -50,17 +50,17 @@
       left: 0;
       right: 0;
       z-index: 1040;
-      background: rgba(15, 23, 42, 0.97);
+      background: rgba(15, 23, 42, 0.98);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 10px 20px;
-      box-shadow: 0 4px 25px rgba(0,0,0,0.45);
+      padding: 7px 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
 
     /* Secondary Toolbar (Views, Search, Filters) */
     .org-toolbar {
       position: sticky;
-      top: 110px;
+      top: 51px;
       left: 0;
       right: 0;
       z-index: 1030;
@@ -987,37 +987,32 @@
   </style>
   <link rel="stylesheet" href="org_tree.css">
   <link rel="stylesheet" href="personnel_tools.css">
+  <link rel="stylesheet" href="global_logo.css">
 </head>
 <body>
 
-  <!-- ==================== TOP NAVIGATION & ACTIONS ==================== -->
-  <header class="top-control-bar d-flex align-items-center justify-content-between text-white flex-wrap gap-2">
-    <div class="d-flex align-items-center gap-3">
-      <!-- Back to Main App Button -->
-      <button type="button" onclick="handleGoBackToMain()" class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-semibold d-flex align-items-center gap-1.5 shadow-sm" title="ปิดหน้านี้และกลับสู่ระบบหลัก">
-        <i class="bi bi-arrow-left-circle-fill fs-6 text-warning"></i>
-        <span>กลับระบบหลัก</span>
-      </button>
-
-      <div class="border-start border-secondary ps-3">
-        <h6 class="mb-0 fw-bold text-warning d-flex align-items-center gap-2">
-          <i class="bi bi-diagram-3-fill"></i>
-          <span>ผังองค์กรและระบบบุคลากร</span>
-        </h6>
-        <small id="orgProjectHeaderSubtitle" class="text-white-50 fs-8">โครงการรัตนบุปผา และผลิตดอกไม้ธรรมยาตรา</small>
-      </div>
+  <!-- ==================== SINGLE TOP NAVBAR ==================== -->
+  <header class="top-control-bar d-flex align-items-center justify-content-between text-white flex-wrap gap-2 no-print">
+    <!-- Left: Clickable Sunflower Brand Logo & Menu Link -->
+    <div class="d-flex align-items-center">
+      <a href="index.html" onclick="event.preventDefault(); handleGoBackToMain();" class="d-flex align-items-center gap-2 text-decoration-none text-white brand-logo-btn" title="คลิกเพื่อกลับสู่หน้าหลัก">
+        <div class="d-flex align-items-center justify-content-center bg-white bg-opacity-10 rounded-circle shadow-sm overflow-hidden" data-flora-logo="navbar" data-logo-size="32" style="width: 32px; height: 32px;">
+          <i class="bi bi-flower1 fs-5 text-warning"></i>
+        </div>
+        <span class="fw-bold fs-6 tracking-wide text-warning">หน้าหลัก</span>
+      </a>
     </div>
 
-    <!-- Quick Actions -->
-    <div class="d-flex align-items-center gap-2 flex-wrap" id="orgQuickActions">
-      <button type="button" class="btn btn-warning btn-sm rounded-pill px-3 py-1.5 fw-bold text-dark shadow-sm d-flex align-items-center gap-1.5 personnel-admin-only" onclick="openAddModal()">
-        <i class="bi bi-person-plus-fill fs-6"></i>
-        <span>เพิ่มบุคลากร</span>
-      </button>
+    <!-- Center & Right: Navigation Tabs + Export Menu -->
+    <nav class="workspace-tabs d-flex align-items-center gap-2 flex-wrap m-0 p-0" aria-label="เลือกหน้าจัดการผัง">
+      <button type="button" id="tabOrgChart" class="workspace-tab-btn active" onclick="switchWorkspaceTab('org')"><i class="bi bi-diagram-3-fill me-1"></i> ผังองค์กร</button>
+      <button type="button" id="tabPersonnelDirectory" class="workspace-tab-btn" onclick="switchWorkspaceTab('directory')"><i class="bi bi-people-fill me-1"></i> ระบบบุคลากร</button>
+      <button type="button" id="tabTreeManager" class="workspace-tab-btn" onclick="switchWorkspaceTab('tree')"><i class="bi bi-diagram-2-fill me-1"></i> จัดการโครงสร้าง</button>
+      <button type="button" id="tabPersonnelAttendance" class="workspace-tab-btn" onclick="switchWorkspaceTab('attendance')"><i class="bi bi-clock-history me-1"></i> ลงเวลา / การลา</button>
 
       <!-- Consolidated Export & Print Dropdown Menu -->
-      <div class="dropdown">
-        <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-semibold dropdown-toggle d-flex align-items-center gap-1.5 shadow-sm" type="button" id="dropdownExportMenu" data-bs-toggle="dropdown" aria-expanded="false" title="ส่งออกหรือพิมพ์ผังโครงสร้าง">
+      <div class="dropdown" id="orgExportMenuWrap">
+        <button class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-bold dropdown-toggle d-flex align-items-center gap-1.5 shadow-sm" type="button" id="dropdownExportMenu" data-bs-toggle="dropdown" aria-expanded="false" title="ส่งออกหรือพิมพ์ผังโครงสร้าง">
           <i class="bi bi-box-arrow-up-right fs-6 text-warning"></i>
           <span>ส่งออก / พิมพ์ผัง</span>
         </button>
@@ -1050,17 +1045,20 @@
               </div>
             </button>
           </li>
+          <li><hr class="dropdown-divider my-1"></li>
+          <li>
+            <button class="dropdown-item py-2 px-3 d-flex align-items-center gap-2.5" type="button" onclick="openGlobalLogoModal()">
+              <i class="bi bi-flower1 text-warning fs-5"></i>
+              <div>
+                <div class="fw-bold fs-7 text-dark">จัดการโลโก้องค์กร / โครงการ</div>
+                <small class="text-muted fs-8">เปลี่ยนโลโก้ 2 มุมบนและเมนูหลัก หรือใช้ดอกทานตะวัน</small>
+              </div>
+            </button>
+          </li>
         </ul>
       </div>
-    </div>
+    </nav>
   </header>
-
-  <nav class="workspace-tabs no-print" aria-label="เลือกหน้าจัดการผัง">
-    <button type="button" id="tabOrgChart" class="workspace-tab-btn active" onclick="switchWorkspaceTab('org')"><i class="bi bi-diagram-3-fill me-1"></i> ผังองค์กร</button>
-    <button type="button" id="tabPersonnelDirectory" class="workspace-tab-btn" onclick="switchWorkspaceTab('directory')"><i class="bi bi-people-fill me-1"></i> ระบบบุคลากร</button>
-    <button type="button" id="tabTreeManager" class="workspace-tab-btn" onclick="switchWorkspaceTab('tree')"><i class="bi bi-diagram-2-fill me-1"></i> จัดการโครงสร้าง (Tree)</button>
-    <button type="button" id="tabPersonnelAttendance" class="workspace-tab-btn" onclick="switchWorkspaceTab('attendance')"><i class="bi bi-clock-history me-1"></i> ลงเวลา / การลา</button>
-  </nav>
 
   <!-- ==================== SECONDARY TOOLBAR & CONTROLS ==================== -->
   <div class="org-toolbar flex-wrap align-items-center justify-content-between gap-3 no-print" id="orgToolbar">
@@ -1801,6 +1799,7 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script type="module" src="/global_logo.js"></script>
   <script type="module" src="personnel_tools.js"></script>
   <script type="module" src="org_tree.js"></script>
 
@@ -1930,6 +1929,9 @@
           collection, doc, getDoc, getDocs, addDoc, setDoc, deleteDoc, onSnapshot,
           ref, uploadBytes, getDownloadURL, deleteObject
         };
+        if (typeof window.floraLogo?.connectGlobalLogoFirestore === 'function') {
+          window.floraLogo.connectGlobalLogoFirestore(window.personnelApi);
+        }
         window.dispatchEvent(new CustomEvent('flora-personnel-api-ready'));
         onAuthStateChanged(window.personnelAuth, async (user) => {
           let access = !user && personnelSessionAccess?.isAdmin === true && personnelSessionAccess?.email === 'jaru072@gmail.com'
@@ -1954,6 +1956,7 @@
           window.dispatchEvent(new CustomEvent('flora-personnel-auth-changed', { detail: access }));
         });
         if (typeof window.connectOrgTreeFirestore === 'function') window.connectOrgTreeFirestore({ db: window.db, doc, setDoc, onSnapshot });
+        if (typeof window.floraLogo?.connectGlobalLogoFirestore === 'function') window.floraLogo.connectGlobalLogoFirestore({ db: window.db, doc, setDoc, onSnapshot, getDoc, getDocs, collection, deleteDoc });
 
         // Real-time listener for employees
         onSnapshot(collection(window.db, "employees"), (snapshot) => {
@@ -2263,14 +2266,36 @@
     }
 
     // ==================== RENDERING ENGINE ====================
-    window.renderOrgChart = function() {
+    let orgChartRendered = false;
+    let orgChartDirty = true;
+    let lastRenderState = { signature: '' };
+
+    function computeOrgDataSignature() {
+      const emps = window.employees || [];
+      const empsSummary = emps.map(e => `${e.id || e.code}:${e.department || ''}:${e.position || ''}:${e.departmentNodeId || ''}:${e.positionNodeId || ''}:${e.updatedAt || ''}`).join(';');
+      return `${emps.length}|${empsSummary}|${window.currentView || 'hierarchy'}|${window.activeFilterDept || 'ALL'}|${window.searchKeyword || ''}|${window.orgTreeVersion || 0}`;
+    }
+
+    window.markOrgChartDirty = function() {
+      orgChartDirty = true;
+      if (window.currentWorkspaceTab === 'org' || !window.currentWorkspaceTab) {
+        renderOrgChart(true);
+      }
+    };
+
+    window.renderOrgChart = function(force = false) {
       updateDepartmentDropdownFilter();
       updateStats();
 
       const container = document.getElementById('chartContent');
       if (!container) return;
 
-      let filteredList = [...window.employees];
+      const currentSignature = computeOrgDataSignature();
+      if (!force && orgChartRendered && !orgChartDirty && currentSignature === lastRenderState.signature) {
+        return;
+      }
+
+      let filteredList = [...(window.employees || [])];
 
       // Filter by Department
       if (window.activeFilterDept !== 'ALL') {
@@ -2302,8 +2327,30 @@
       // Update Unassigned Drawer and Badge counts
       renderUnassignedDrawer();
 
+      orgChartRendered = true;
+      orgChartDirty = false;
+      lastRenderState.signature = currentSignature;
+
       // Automatically recalculate stage size
-      setTimeout(applyZoom, 50);
+      applyZoom();
+    };
+
+    window.onSwitchToOrgChart = function() {
+      const container = document.getElementById('chartContent');
+      const hasContent = container && container.children.length > 0;
+      const signature = computeOrgDataSignature();
+
+      if (!hasContent || orgChartDirty || signature !== lastRenderState.signature) {
+        renderOrgChart(true);
+        if (!window.currentZoom || window.currentZoom === 1.0) {
+          fitToWidth();
+        }
+      } else {
+        // Fast instant path: 0ms
+        if (window.currentView === 'hierarchy') {
+          updateRequestedHierarchyLines();
+        }
+      }
     };
 
     function updateStats() {
@@ -2495,7 +2542,16 @@
 
       // Member Avatar List Renderer (ทุกส่วนงานไม่จำกัดจำนวนคน + รองรับ Drag & Drop และ 1-Click Popup Menu)
       function renderAvatarMatrix(emps, deptDefault, posDefault) {
-        let html = '<div class="d-flex flex-wrap justify-content-center align-items-center gap-1 my-1">';
+        const safeTargetDept = escapeHtml(deptDefault);
+        const safeTargetPos = escapeHtml(posDefault);
+        const safeTargetDeptLabel = escapeHtml(stripStructureCode(deptDefault));
+
+        let html = `<div class="d-flex flex-wrap justify-content-center align-items-center gap-1 my-1" 
+                         data-target-dept="${safeTargetDept}" 
+                         data-target-pos="${safeTargetPos}"
+                         ondragover="handleSlotDragOver(event)" 
+                         ondragleave="handleSlotDragLeave(event)" 
+                         ondrop="handleSlotDrop(event, '${safeTargetDept}', '${safeTargetPos}')">`;
         
         if (emps && emps.length > 0) {
           emps.forEach(emp => {
@@ -2506,11 +2562,17 @@
             html += `
               <div class="avatar-item" 
                    id="avatar-item-${safeId}"
+                   data-emp-id="${safeId}"
+                   data-target-dept="${safeTargetDept}"
+                   data-target-pos="${safeTargetPos}"
                    draggable="true"
                    ondragstart="handleAvatarDragStart(event, '${safeId}')"
                    ondragend="handleAvatarDragEnd(event)"
+                   ondragover="handleSlotDragOver(event)"
+                   ondragleave="handleSlotDragLeave(event)"
+                   ondrop="handleSlotDrop(event, '${safeTargetDept}', '${safeTargetPos}')"
                    onclick="handleAvatarClick(event, '${safeId}')"
-                   title="[${safeCode}] ${safeName} (${escapeHtml(stripStructureCode(emp.position || emp.department || ''))}) - คลิกเพื่อเลือกเมนู หรือลากเพื่อย้าย">
+                   title="[${safeCode}] ${safeName} (${escapeHtml(stripStructureCode(emp.position || emp.department || ''))}) - คลิกเพื่อเลือกเมนู หรือกดแช่/ลากเพื่อย้าย">
                 <div class="avatar-circle-ph has-emp">
                   ${photoUrl ? `<img src="${photoUrl}" alt="${safeName}" onerror="this.parentElement.innerHTML='<i class=\\\'bi bi-person-fill text-primary\\\'></i>'" />` : `<i class="bi bi-person-fill text-primary"></i>`}
                 </div>
@@ -2522,12 +2584,11 @@
         }
 
         // Action slot "+ เพิ่มคน" / Drop target for Drag-and-Drop
-        const safeTargetDept = escapeHtml(deptDefault);
-        const safeTargetPos = escapeHtml(posDefault);
-        const safeTargetDeptLabel = escapeHtml(stripStructureCode(deptDefault));
         html += `
           <div class="avatar-item avatar-slot-add" 
                id="add-slot-${Math.random().toString(36).substring(2, 8)}"
+               data-target-dept="${safeTargetDept}"
+               data-target-pos="${safeTargetPos}"
                ondragover="handleSlotDragOver(event)"
                ondragleave="handleSlotDragLeave(event)"
                ondrop="handleSlotDrop(event, '${safeTargetDept}', '${safeTargetPos}')"
@@ -2585,6 +2646,8 @@
           list.filter(emp => emp.departmentNodeId === nodeId || roleNodes.some(node => emp.positionNodeId === node.id))
             .forEach(emp => memberMap.set(emp.id || emp.code, emp));
         }
+        list.filter(emp => emp.department === deptName || emp.department === title || (nodeId && emp.departmentNodeId === nodeId))
+          .forEach(emp => memberMap.set(emp.id || emp.code, emp));
         const rawMembers = Array.from(memberMap.values());
         const members = rawMembers.filter(e => {
           if (isUnassigned(e)) return false;
@@ -2610,11 +2673,17 @@
           leaderHtml = `
             <div class="team-leader-slot" 
                  id="slot-lead-${safeLeaderId}"
+                 data-emp-id="${safeLeaderId}"
+                 data-target-dept="${escapeHtml(deptName)}"
+                 data-target-pos="${escapeHtml(leaderTitle)}"
                  draggable="true"
                  ondragstart="handleAvatarDragStart(event, '${safeLeaderId}')"
                  ondragend="handleAvatarDragEnd(event)"
+                 ondragover="handleSlotDragOver(event)"
+                 ondragleave="handleSlotDragLeave(event)"
+                 ondrop="handleSlotDrop(event, '${escapeHtml(deptName)}', '${escapeHtml(leaderTitle)}')"
                  onclick="handleAvatarClick(event, '${safeLeaderId}')"
-                 title="หัวหน้าทีม ${safeLeaderName} - คลิกเพื่อเลือกเมนู หรือลากเพื่อโยกย้าย">
+                 title="หัวหน้าทีม ${safeLeaderName} - คลิกเพื่อเลือกเมนู หรือกดแช่/ลากเพื่อโยกย้าย">
               <span class="leader-badge ${tagClass}">หัวหน้าทีม</span>
               <div class="leader-avatar-circle ${avatarBgClass}">
                 ${safeLeaderPhoto ? `<img src="${safeLeaderPhoto}" alt="${safeLeaderName}" />` : `<i class="bi bi-person-badge-fill"></i>`}
@@ -2629,6 +2698,8 @@
           leaderHtml = `
             <div class="team-leader-slot leader-empty" 
                  id="slot-lead-empty-${leaderCode.replace(/\./g, '_')}"
+                 data-target-dept="${escapeHtml(deptName)}"
+                 data-target-pos="${escapeHtml(leaderTitle)}"
                  ondragover="handleSlotDragOver(event)"
                  ondragleave="handleSlotDragLeave(event)"
                  ondrop="handleSlotDrop(event, '${escapeHtml(deptName)}', '${escapeHtml(leaderTitle)}')"
@@ -2647,7 +2718,12 @@
         }
 
         return `
-          <div class="dept-card ${cardBorderClass} text-center">
+          <div class="dept-card ${cardBorderClass} text-center"
+               data-target-dept="${escapeHtml(deptName)}"
+               data-target-pos="${escapeHtml(defaultMemberPos)}"
+               ondragover="handleSlotDragOver(event)"
+               ondragleave="handleSlotDragLeave(event)"
+               ondrop="handleSlotDrop(event, '${escapeHtml(deptName)}', '${escapeHtml(defaultMemberPos)}')">
             <div class="dept-title-badge ${badgeClass}">${customIcon ? `<i class="bi ${customIcon} me-1"></i>` : ''}${escapeHtml(stripStructureCode(title))}</div>
             ${leaderHtml}
             ${renderAvatarMatrix(members, deptName, defaultMemberPos)}
@@ -2675,24 +2751,13 @@
       let posterHtml = `
         <div class="chart-poster" id="chartPosterArea">
           
-          <!-- Lotus Background Decors in Corners -->
-          <svg class="lotus-decor lotus-tl" viewBox="0 0 100 100">
-            <path d="M50,10 C45,30 20,40 5,50 C20,60 45,70 50,90 C55,70 80,60 95,50 C80,40 55,30 50,10 Z" fill="#fce4ec" opacity="0.65"/>
-            <path d="M50,20 C46,35 30,45 18,50 C30,55 46,65 50,80 C54,65 70,55 82,50 C70,45 54,35 50,20 Z" fill="#f8bbd0" opacity="0.65"/>
-            <circle cx="50" cy="50" r="10" fill="#ffd54f" opacity="0.85"/>
-          </svg>
-          <svg class="lotus-decor lotus-tr" viewBox="0 0 100 100">
-            <path d="M50,10 C45,30 20,40 5,50 C20,60 45,70 50,90 C55,70 80,60 95,50 C80,40 55,30 50,10 Z" fill="#fce4ec" opacity="0.65"/>
-            <circle cx="50" cy="50" r="10" fill="#ffd54f" opacity="0.85"/>
-          </svg>
-          <svg class="lotus-decor lotus-bl" viewBox="0 0 100 100">
-            <path d="M50,10 C45,30 20,40 5,50 C20,60 45,70 50,90 C55,70 80,60 95,50 C80,40 55,30 50,10 Z" fill="#fce4ec" opacity="0.65"/>
-            <circle cx="50" cy="50" r="10" fill="#ffd54f" opacity="0.85"/>
-          </svg>
-          <svg class="lotus-decor lotus-br" viewBox="0 0 100 100">
-            <path d="M50,10 C45,30 20,40 5,50 C20,60 45,70 50,90 C55,70 80,60 95,50 C80,40 55,30 50,10 Z" fill="#fce4ec" opacity="0.65"/>
-            <circle cx="50" cy="50" r="10" fill="#ffd54f" opacity="0.85"/>
-          </svg>
+          <!-- Top 2 Organization Logos (Top-Left & Top-Right) -->
+          <div class="poster-corner-badge poster-corner-tl" data-flora-logo="corner" data-logo-size="82" onclick="openGlobalLogoModal()" title="โลโก้องค์กร / โครงการ (คลิกเพื่อจัดการและเปลี่ยนโลโก้)">
+            ${typeof window.renderFloraLogoBadge === 'function' ? window.renderFloraLogoBadge(82, { className: 'corner-logo-inner', interactive: false }) : '<div class="corner-logo-inner"><svg width="82" height="82" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="#fff" stroke="#ffd54f" stroke-width="2"/><circle cx="50" cy="50" r="18" fill="#5d4037"/></svg></div>'}
+          </div>
+          <div class="poster-corner-badge poster-corner-tr" data-flora-logo="corner" data-logo-size="82" onclick="openGlobalLogoModal()" title="โลโก้องค์กร / โครงการ (คลิกเพื่อจัดการและเปลี่ยนโลโก้)">
+            ${typeof window.renderFloraLogoBadge === 'function' ? window.renderFloraLogoBadge(82, { className: 'corner-logo-inner', interactive: false }) : '<div class="corner-logo-inner"><svg width="82" height="82" viewBox="0 0 100 100"><circle cx="50" cy="50" r="47" fill="#fff" stroke="#ffd54f" stroke-width="2"/><circle cx="50" cy="50" r="18" fill="#5d4037"/></svg></div>'}
+          </div>
 
           <!-- SVG Hierarchy Connecting Lines -->
           <svg class="svg-hierarchy-lines" viewBox="0 0 1540 1000" preserveAspectRatio="none">
@@ -3149,6 +3214,9 @@
       `;
 
       container.innerHTML = posterHtml;
+      if (typeof window.floraLogo?.updateAllRenderedLogos === 'function') {
+        window.floraLogo.updateAllRenderedLogos();
+      }
       requestAnimationFrame(() => requestAnimationFrame(updateRequestedHierarchyLines));
     }
 
@@ -4168,7 +4236,13 @@
     window.draggedEmpId = null;
 
     // 1-Click Popup Menu
+    window.justFinishedDragging = false;
     window.handleAvatarClick = function(event, empId) {
+      if (window.justFinishedDragging) {
+        window.justFinishedDragging = false;
+        event?.stopPropagation?.();
+        return;
+      }
       event.stopPropagation();
       window.activeContextMenuEmpId = empId;
       const emp = window.employees.find(e => (e.id || e.code) === empId);
@@ -4280,17 +4354,19 @@
       renderOrgChart();
     };
 
-    // Drag and Drop Logic
+    // ==================== DRAG AND DROP LOGIC (MOUSE & TOUCH/LONG-PRESS) ====================
     window.handleAvatarDragStart = function(event, empId) {
       if (window.requirePersonnelAdmin && !window.requirePersonnelAdmin('ลากย้ายบุคลากร')) {
-        event.preventDefault();
+        event?.preventDefault?.();
         return;
       }
       window.draggedEmpId = empId;
-      event.dataTransfer.setData('text/plain', empId);
-      event.dataTransfer.effectAllowed = 'move';
+      if (event?.dataTransfer) {
+        event.dataTransfer.setData('text/plain', empId);
+        event.dataTransfer.effectAllowed = 'move';
+      }
       
-      const el = event.currentTarget;
+      const el = event?.currentTarget || document.getElementById(`avatar-item-${empId}`);
       if (el) {
         el.classList.add('dragging');
       }
@@ -4298,81 +4374,327 @@
     };
 
     window.handleAvatarDragEnd = function(event) {
-      const el = event.currentTarget;
+      const el = event?.currentTarget;
       if (el) {
         el.classList.remove('dragging');
       }
-      document.querySelectorAll('.avatar-slot-add').forEach(slot => {
+      document.querySelectorAll('.avatar-item.dragging, .unassigned-card.dragging').forEach(item => {
+        item.classList.remove('dragging');
+      });
+      document.querySelectorAll('.drop-target-active').forEach(slot => {
         slot.classList.remove('drop-target-active');
       });
       window.draggedEmpId = null;
     };
 
     window.handleSlotDragOver = function(event) {
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'move';
-      const slot = event.currentTarget;
+      if (event) {
+        event.preventDefault();
+        if (event.dataTransfer) {
+          event.dataTransfer.dropEffect = 'move';
+        }
+      }
+      const slot = event?.currentTarget || event?.target?.closest?.('.avatar-slot-add, .avatar-item, .team-leader-slot, .section-head-box, .exec-box, .dept-card, [ondrop]');
       if (slot && !slot.classList.contains('drop-target-active')) {
         slot.classList.add('drop-target-active');
       }
     };
 
     window.handleSlotDragLeave = function(event) {
-      const slot = event.currentTarget;
+      const slot = event?.currentTarget || event?.target?.closest?.('.drop-target-active');
       if (slot) {
         slot.classList.remove('drop-target-active');
       }
     };
 
     window.handleSlotDrop = async function(event, targetDept, targetPos) {
-      event.preventDefault();
-      if (window.requirePersonnelAdmin && !window.requirePersonnelAdmin('ย้ายบุคลากรในผัง')) return;
-      const slot = event.currentTarget;
-      if (slot) {
-        slot.classList.remove('drop-target-active');
+      if (event) {
+        event.preventDefault?.();
+        event.stopPropagation?.();
       }
+      
+      document.querySelectorAll('.drop-target-active').forEach(slot => {
+        slot.classList.remove('drop-target-active');
+      });
 
-      const empId = event.dataTransfer.getData('text/plain') || window.draggedEmpId;
+      const empId = (event?.dataTransfer?.getData && event.dataTransfer.getData('text/plain')) || window.draggedEmpId;
+      window.draggedEmpId = null;
       if (!empId) return;
 
-      const emp = window.employees.find(e => (e.id || e.code) === empId);
+      const emp = (window.employees || []).find(e => (e.id || e.code) === empId);
       if (!emp) return;
 
       const oldDept = emp.department || 'ยังไม่ระบุแผนก';
       const treeAssignment = typeof window.resolveFloraAssignmentByLabels === 'function' ? window.resolveFloraAssignmentByLabels(targetDept, targetPos) : null;
-      const alreadyInTarget = treeAssignment?.positionNodeId
-        ? emp.positionNodeId === treeAssignment.positionNodeId
-        : (emp.departmentNodeId && emp.departmentNodeId === treeAssignment?.departmentNodeId);
-      if (alreadyInTarget) {
+      
+      const nextDept = treeAssignment?.department || targetDept;
+      const nextDeptNodeId = treeAssignment?.departmentNodeId || '';
+      const nextPos = treeAssignment?.position || targetPos || 'พนักงาน';
+      const nextPosNodeId = treeAssignment?.positionNodeId || '';
+
+      const sameDept = (emp.department === nextDept) || (nextDeptNodeId && emp.departmentNodeId === nextDeptNodeId);
+      const samePos = (emp.position === nextPos) || (nextPosNodeId && emp.positionNodeId === nextPosNodeId);
+      if (sameDept && samePos && (emp.department || emp.departmentNodeId)) {
         showToast(`⚠️ [${emp.name}] อยู่ในตำแหน่งนี้แล้ว`);
         return;
       }
-      if (!window.ensureFloraLeadershipPositionAvailable(empId, treeAssignment?.positionNodeId || '', true)) return;
-      emp.department = treeAssignment?.department || targetDept;
-      emp.departmentNodeId = treeAssignment?.departmentNodeId || '';
-      emp.position = treeAssignment?.position || targetPos || 'พนักงาน';
-      emp.positionNodeId = treeAssignment?.positionNodeId || '';
-      emp.role = window.getFloraRoleForPositionNode(emp.positionNodeId, emp.positionNodeId ? emp.role : 'WORKER');
-      emp.updatedAt = new Date().toISOString();
 
-      syncToLocalStorage();
-
-      if (window.db) {
-        try {
-          const docRef = doc(window.db, "employees", emp.id || emp.code);
-          await setDoc(docRef, { role: emp.role, department: emp.department, position: emp.position || targetPos, departmentNodeId: emp.departmentNodeId, positionNodeId: emp.positionNodeId, updatedAt: emp.updatedAt }, { merge: true });
-        } catch (err) {
-          console.warn("Firestore drag drop sync:", err);
+      // If assigning to a single-seat leadership role that already has an occupant, replace/swap cleanly
+      if (nextPosNodeId && typeof window.getFloraLeadershipPositionConflict === 'function') {
+        const conflict = window.getFloraLeadershipPositionConflict(empId, nextPosNodeId);
+        if (conflict && conflict.occupants.length >= conflict.capacity) {
+          conflict.occupants.forEach(existing => {
+            existing.position = 'พนักงาน';
+            existing.positionNodeId = '';
+            existing.role = 'WORKER';
+            existing.updatedAt = new Date().toISOString();
+          });
         }
       }
 
-      showToast(`🎯 โยกย้าย [${emp.code || emp.id}] ${emp.name} ไปยัง "${targetDept}" สำเร็จ!`);
-      await window.logPersonnelAudit?.('ย้ายบุคลากรในผัง', { employeeId: empId, name: emp.name, oldDepartment: oldDept, department: emp.department, position: emp.position });
-      renderOrgChart();
+      // 1. Update in-memory state
+      emp.department = nextDept;
+      emp.departmentNodeId = nextDeptNodeId;
+      emp.position = nextPos;
+      emp.positionNodeId = nextPosNodeId;
+      emp.role = window.getFloraRoleForPositionNode ? window.getFloraRoleForPositionNode(emp.positionNodeId, emp.positionNodeId ? emp.role : 'WORKER') : (emp.role || 'WORKER');
+      emp.updatedAt = new Date().toISOString();
+
+      // 2. Mark dirty and synchronous local cache persistence
+      orgChartDirty = true;
+      syncToLocalStorage();
+
+      // 3. IMMEDIATE UI REFRESH (รูปและข้อมูลย้ายทันทีแบบไม่ต้องรอ)
+      renderOrgChart(true);
       if (typeof renderUnassignedDrawer === 'function') {
         renderUnassignedDrawer();
       }
+
+      // 4. Instant feedback toast
+      showToast(`🎯 โยกย้าย [${emp.code || emp.id}] ${emp.name} ไปยัง "${nextDept}" สำเร็จ!`);
+
+      // 5. Asynchronous background persistence (Non-blocking)
+      if (window.db) {
+        try {
+          const docRef = doc(window.db, "employees", emp.id || emp.code);
+          setDoc(docRef, { 
+            role: emp.role, 
+            department: emp.department, 
+            position: emp.position, 
+            departmentNodeId: emp.departmentNodeId, 
+            positionNodeId: emp.positionNodeId, 
+            updatedAt: emp.updatedAt 
+          }, { merge: true }).catch(err => console.warn("Firestore drag drop sync:", err));
+        } catch (err) {
+          console.warn("Firestore async setDoc:", err);
+        }
+      }
+
+      try {
+        window.logPersonnelAudit?.('ย้ายบุคลากรในผัง', { 
+          employeeId: empId, 
+          name: emp.name, 
+          oldDepartment: oldDept, 
+          department: emp.department, 
+          position: emp.position 
+        });
+      } catch (err) {
+        // silent audit error
+      }
     };
+
+    // ==================== TOUCH & LONG-PRESS DRAG-AND-DROP CONTROLLER ====================
+    (function initTouchDragAndDrop() {
+      let touchTimer = null;
+      let isTouchDragging = false;
+      let startTouchX = 0, startTouchY = 0;
+      let currentDropTarget = null;
+      let draggedElement = null;
+      let ghostEl = null;
+
+      function cleanupTouchDrag() {
+        if (touchTimer) {
+          clearTimeout(touchTimer);
+          touchTimer = null;
+        }
+        if (ghostEl && ghostEl.parentNode) {
+          ghostEl.parentNode.removeChild(ghostEl);
+        }
+        ghostEl = null;
+        if (draggedElement) {
+          draggedElement.classList.remove('dragging');
+          draggedElement = null;
+        }
+        document.querySelectorAll('.drop-target-active').forEach(el => el.classList.remove('drop-target-active'));
+        currentDropTarget = null;
+        isTouchDragging = false;
+      }
+
+      document.addEventListener('touchstart', (e) => {
+        if (e.touches.length !== 1) {
+          cleanupTouchDrag();
+          return;
+        }
+
+        const touch = e.touches[0];
+        startTouchX = touch.clientX;
+        startTouchY = touch.clientY;
+
+        const target = touch.target;
+        const source = target.closest('[draggable="true"], .avatar-item, .team-leader-slot, .head-avatar, .exec-avatar, .unassigned-card, .live-person-chip');
+        if (!source) return;
+
+        // Extract empId
+        let empId = source.getAttribute('data-emp-id');
+        if (!empId) {
+          const idAttr = source.id || '';
+          if (idAttr.startsWith('avatar-item-')) empId = idAttr.replace('avatar-item-', '');
+          else if (idAttr.startsWith('slot-lead-')) empId = idAttr.replace('slot-lead-', '');
+        }
+        if (!empId) {
+          const ondragAttr = source.getAttribute('ondragstart') || '';
+          const match = ondragAttr.match(/handleAvatarDragStart\([^,]+,\s*'([^']+)'\)/);
+          if (match) empId = match[1];
+        }
+        if (!empId) {
+          const onclickAttr = source.getAttribute('onclick') || '';
+          const match = onclickAttr.match(/handleAvatarClick\([^,]+,\s*'([^']+)'\)/);
+          if (match) empId = match[1];
+        }
+
+        if (!empId) return;
+
+        const emp = (window.employees || []).find(e => (e.id || e.code) === empId);
+        if (!emp) return;
+
+        // Start long-press timer (180ms)
+        touchTimer = setTimeout(() => {
+          isTouchDragging = true;
+          window.draggedEmpId = empId;
+          draggedElement = source;
+          source.classList.add('dragging');
+          if (navigator.vibrate) {
+            try { navigator.vibrate(35); } catch (_) {}
+          }
+          hideContextMenu();
+
+          // Create floating touch ghost
+          ghostEl = document.createElement('div');
+          ghostEl.id = 'touchDragGhost';
+          ghostEl.style.position = 'fixed';
+          ghostEl.style.left = `${touch.clientX}px`;
+          ghostEl.style.top = `${touch.clientY}px`;
+          ghostEl.style.zIndex = '999999';
+          ghostEl.style.pointerEvents = 'none';
+          ghostEl.style.transform = 'translate(-50%, -50%) scale(1.18)';
+          ghostEl.style.borderRadius = '50%';
+          ghostEl.style.width = '52px';
+          ghostEl.style.height = '52px';
+          ghostEl.style.boxShadow = '0 10px 25px rgba(0,0,0,0.35), 0 0 0 3px #ff9800';
+          ghostEl.style.background = '#ffffff';
+          ghostEl.style.overflow = 'hidden';
+          ghostEl.style.display = 'flex';
+          ghostEl.style.alignItems = 'center';
+          ghostEl.style.justifyContent = 'center';
+
+          const photoUrl = emp.photoUrl || emp.photo || '';
+          if (photoUrl) {
+            ghostEl.innerHTML = `<img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;" />`;
+          } else {
+            ghostEl.innerHTML = `<i class="bi bi-person-fill text-primary" style="font-size:26px;"></i>`;
+          }
+          document.body.appendChild(ghostEl);
+          showToast(`👆 ลาก [${emp.name}] ไปปล่อยยังตำแหน่งที่ต้องการ`);
+        }, 180);
+      }, { passive: true });
+
+      document.addEventListener('touchmove', (e) => {
+        if (!e.touches.length) return;
+        const touch = e.touches[0];
+
+        if (!isTouchDragging) {
+          // If moved before long-press fires, cancel timer so standard page scrolling works
+          const dist = Math.hypot(touch.clientX - startTouchX, touch.clientY - startTouchY);
+          if (dist > 8 && touchTimer) {
+            clearTimeout(touchTimer);
+            touchTimer = null;
+          }
+          return;
+        }
+
+        // We ARE touch-dragging
+        e.preventDefault();
+
+        if (ghostEl) {
+          ghostEl.style.left = `${touch.clientX}px`;
+          ghostEl.style.top = `${touch.clientY}px`;
+        }
+
+        // Find element under touch point
+        const elUnderPoint = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (!elUnderPoint) return;
+
+        const candidateTarget = elUnderPoint.closest('.avatar-slot-add, .avatar-item, .team-leader-slot, .section-head-box, .exec-box, .dept-card, .live-node-people, [ondrop]');
+        if (candidateTarget !== currentDropTarget) {
+          if (currentDropTarget) {
+            currentDropTarget.classList.remove('drop-target-active');
+          }
+          currentDropTarget = candidateTarget;
+          if (currentDropTarget) {
+            currentDropTarget.classList.add('drop-target-active');
+          }
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchend', (e) => {
+        if (touchTimer) {
+          clearTimeout(touchTimer);
+          touchTimer = null;
+        }
+
+        if (!isTouchDragging) {
+          cleanupTouchDrag();
+          return;
+        }
+
+        e.preventDefault();
+        window.justFinishedDragging = true;
+        setTimeout(() => { window.justFinishedDragging = false; }, 350);
+
+        const dropTarget = currentDropTarget;
+        const empId = window.draggedEmpId;
+        cleanupTouchDrag();
+
+        if (dropTarget && empId) {
+          // Check for tree node drop
+          const treeNodeId = dropTarget.getAttribute('data-node-id') || dropTarget.closest('[data-node-id]')?.getAttribute('data-node-id');
+          if (treeNodeId && typeof window.handleTreeOrgDrop === 'function') {
+            const mockEvt = { preventDefault: () => {}, currentTarget: dropTarget };
+            window.handleTreeOrgDrop(mockEvt, treeNodeId);
+            return;
+          }
+
+          // Main org chart drop
+          let targetDept = dropTarget.getAttribute('data-target-dept');
+          let targetPos = dropTarget.getAttribute('data-target-pos');
+
+          if (!targetDept || !targetPos) {
+            const ondropAttr = dropTarget.getAttribute('ondrop') || '';
+            const match = ondropAttr.match(/handleSlotDrop\([^,]+,\s*'([^']+)',\s*'([^']+)'\)/);
+            if (match) {
+              targetDept = match[1];
+              targetPos = match[2];
+            }
+          }
+
+          if (targetDept && targetPos) {
+            window.handleSlotDrop(null, targetDept, targetPos);
+          }
+        }
+      }, { passive: false });
+
+      document.addEventListener('touchcancel', cleanupTouchDrag, { passive: true });
+    })();
 
     // Global protection against accidental image drops causing full-screen navigation
     window.addEventListener('dragover', (e) => {
@@ -4438,6 +4760,7 @@
 
     // ==================== INTERACTION & CONTROLS ====================
     window.switchView = function(view) {
+      if (window.currentView === view && orgChartRendered && !orgChartDirty) return;
       window.currentView = view;
       const btnHierarchy = document.getElementById('btnViewHierarchy');
       const btnDept = document.getElementById('btnViewDept');
@@ -4445,12 +4768,12 @@
       if (btnHierarchy) btnHierarchy.className = `btn btn-sm rounded-pill px-3 py-1 ${view === 'hierarchy' ? 'btn-primary active shadow-sm fw-bold' : 'fw-semibold text-muted'}`;
       if (btnDept) btnDept.className = `btn btn-sm rounded-pill px-3 py-1 ${view === 'department' ? 'btn-primary active shadow-sm fw-bold' : 'fw-semibold text-muted'}`;
       if (btnGrid) btnGrid.className = `btn btn-sm rounded-pill px-3 py-1 ${view === 'grid' ? 'btn-primary active shadow-sm fw-bold' : 'fw-semibold text-muted'}`;
-      renderOrgChart();
+      renderOrgChart(true);
     };
 
     window.filterByDepartment = function(dept) {
       window.activeFilterDept = dept;
-      renderOrgChart();
+      renderOrgChart(true);
     };
 
     window.searchMatchedIds = [];
@@ -5237,8 +5560,10 @@
 
     // Initialize on load
     window.addEventListener('flora-org-tree-changed', () => {
+      window.orgTreeVersion = (window.orgTreeVersion || 0) + 1;
       if (typeof window.syncFloraEmployeesToTree === 'function') window.syncFloraEmployeesToTree(false);
-      updatePositionDropdownOptions(); updateDepartmentDropdownOptions(); renderOrgChart();
+      updatePositionDropdownOptions(); updateDepartmentDropdownOptions();
+      window.markOrgChartDirty?.();
     });
 
     window.addEventListener('DOMContentLoaded', () => {

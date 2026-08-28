@@ -234,12 +234,25 @@
 
       try {
         storage = getStorage(app);
+        window.storage = storage;
+        window.storageRef = ref;
+        window.uploadBytes = uploadBytes;
+        window.getDownloadURL = getDownloadURL;
+        window.deleteObject = deleteObject;
       } catch (eSt) {
         console.warn("Storage init warning:", eSt);
       }
 
       isFirebaseReady = true;
       console.log("Firebase & Auth initialized successfully with project flora-gaden.");
+      window.floraFirebaseBridge = { 
+        db, doc, setDoc, onSnapshot, getDoc, getDocs, collection, deleteDoc,
+        storage, ref, uploadBytes, getDownloadURL, deleteObject, auth 
+      };
+      if (typeof window.floraLogo?.connectGlobalLogoFirestore === 'function' && db) {
+        window.floraLogo.connectGlobalLogoFirestore(window.floraFirebaseBridge);
+      }
+      window.dispatchEvent(new CustomEvent('flora-firebase-ready'));
     } catch (err) {
       console.warn("Firebase initialization warning:", err);
       isFirebaseReady = false;
@@ -15774,6 +15787,10 @@
       if (!isFirebaseReady || !db) return;
       if (isListenersAttached) return;
       isListenersAttached = true;
+
+      if (typeof window.floraLogo?.connectGlobalLogoFirestore === 'function' && db) {
+        window.floraLogo.connectGlobalLogoFirestore({ db, doc, setDoc, onSnapshot, getDoc, getDocs, collection, deleteDoc });
+      }
 
       // Trigger parallel direct fetch to ensure data lands immediately
       fetchInitialFirestoreData();

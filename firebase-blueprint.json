@@ -133,9 +133,23 @@
         "recordId": { "type": "string" }
       },
       "required": ["id", "timestamp", "userEmail", "module", "action", "details"]
+    },
+    "SystemSettings": {
+      "title": "SystemSettings",
+      "description": "การตั้งค่าระบบส่วนกลาง เช่น โลโก้องค์กร (globalLogo)",
+      "type": "object",
+      "properties": {
+        "globalLogo": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "updatedBy": { "type": "string" }
+      }
     }
   },
   "firestore": {
+    "/system_settings/{settingId}": {
+      "schema": { "$ref": "#/entities/SystemSettings" },
+      "description": "คอลเลกชันการตั้งค่าระบบส่วนกลาง (general)"
+    },
     "/employees/{employeeId}": {
       "schema": { "$ref": "#/entities/Employee" },
       "description": "คอลเลกชันรายชื่อพนักงาน"

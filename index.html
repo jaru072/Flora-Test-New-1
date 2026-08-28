@@ -87,6 +87,7 @@
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="global_logo.css">
 </head>
 <body>
 
@@ -96,7 +97,7 @@
       
       <!-- Brand Header -->
       <div class="text-center mb-3">
-        <div class="d-inline-flex align-items-center justify-content-center p-3 bg-white bg-opacity-10 rounded-circle mb-2 shadow">
+        <div class="d-inline-flex align-items-center justify-content-center p-2 bg-white bg-opacity-10 rounded-circle mb-2 shadow" data-flora-logo="badge" data-logo-size="64">
           <i class="bi bi-flower1 display-4 text-warning"></i>
         </div>
         <h2 class="fw-bold text-white mb-1 blink-text">ทดสอบ โครงการทุ่งสวรรค์ ตะวันฉาย</h2>
@@ -146,8 +147,10 @@
 
 <nav class="navbar navbar-expand-lg navbar-dark navbar-flora sticky-top">
   <div class="container-fluid px-3 px-md-4">
-    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#">
-      <i class="bi bi-flower1 fs-3 text-warning"></i>
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" href="#" title="คลิกเพื่อจัดการโลโก้องค์กร" onclick="if(typeof openGlobalLogoModal === 'function') { openGlobalLogoModal(); return false; }">
+      <div class="d-flex align-items-center justify-content-center overflow-hidden" data-flora-logo="navbar" data-logo-size="32" style="width: 32px; height: 32px;">
+        <i class="bi bi-flower1 fs-3 text-warning"></i>
+      </div>
       <div>
         <div class="lh-1 fs-5 blink-text">ทดสอบ โครงการทุ่งสวรรค์ ตะวันฉาย</div>
         <small class="text-blue-50 fw-normal fs-8">ระบบพนักงาน และ สต๊อกอุปกรณ์</small>
@@ -380,7 +383,16 @@
                   </div>
                 </a>
               </li>
-              <li class="admin-only-element d-none"><hr class="dropdown-divider my-1"></li>
+              <li><hr class="dropdown-divider my-1"></li>
+              <li id="globalLogoMenuItem">
+                <button class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 fw-semibold text-warning" onclick="openGlobalLogoModal()" title="จัดการและเลือกไฟล์รูปภาพโลโก้องค์กร (4 มุมผังองค์กร และเมนูหลัก)">
+                  <i class="bi bi-flower1 text-warning fs-6"></i>
+                  <div>
+                    <div class="lh-1 text-dark fw-bold">จัดการโลโก้องค์กร</div>
+                    <small class="text-muted fs-8 fw-normal">เลือกไฟล์รูปภาพโลโก้ใหม่ หรือใช้ทานตะวัน</small>
+                  </div>
+                </button>
+              </li>
               <li class="super-admin-only-element d-none" id="imageOptimizerMenuItem">
                 <button class="dropdown-item rounded-3 py-2 px-3 d-flex align-items-center gap-2 fw-semibold text-warning" onclick="openImageOptimizerModal()" title="ตั้งค่าการย่อและบีบอัดรูปภาพก่อนอัปโหลด Storage (เฉพาะ Admin jaru072@gmail.com)">
                   <i class="bi bi-lightning-charge-fill text-warning fs-6"></i>
@@ -5222,6 +5234,7 @@
 
 
   <!-- Application Main Logic -->
+  <script type="module" src="/global_logo.js"></script>
   <script type="module" src="script.js"></script>
   <script type="module" src="backup_restore.js"></script>
 

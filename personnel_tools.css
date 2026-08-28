@@ -1,11 +1,11 @@
-.personnel-directory-panel{min-height:calc(100vh - 112px);padding:20px clamp(10px,2.5vw,32px) 60px;background:linear-gradient(135deg,#f4f8f6,#edf3f9)}
+.personnel-directory-panel{min-height:calc(100vh - 52px);padding:20px clamp(10px,2.5vw,32px) 60px;background:linear-gradient(135deg,#f4f8f6,#edf3f9)}
 .personnel-directory-shell{max-width:1500px;margin:0 auto}
 .personnel-directory-toolbar,.personnel-directory-content,.personnel-bulk-bar{background:#fff;border:1px solid #dbe5e0;border-radius:18px;box-shadow:0 12px 35px rgba(20,63,48,.08)}
 .personnel-directory-toolbar{padding:16px;margin-bottom:12px}
 .personnel-directory-content{overflow:hidden}
 .personnel-bulk-bar{display:none;padding:12px 15px;margin-bottom:12px;border-left:5px solid #176e4c}
 .personnel-bulk-bar.show{display:flex}
-.personnel-table-wrap{overflow:auto;max-height:calc(100vh - 310px)}
+.personnel-table-wrap{overflow:auto;max-height:calc(100vh - 250px)}
 .personnel-table{min-width:1050px;margin:0}
 .personnel-table thead{position:sticky;top:0;z-index:2;background:#f4f8f6}
 .personnel-table td,.personnel-table th{vertical-align:middle}

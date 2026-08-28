@@ -244,6 +244,7 @@
         <div class="tree-toolbar">
           <label class="tree-search"><i class="bi bi-search"></i><input id="treeSearchInput" value="${esc(query)}" oninput="floraTreeSearch(this.value)" placeholder="ค้นหาชื่อหน่วยงานหรือตำแหน่ง..."></label>
           <div class="tree-toolbar-actions">
+            <button class="tree-warning" onclick="openGlobalLogoModal()" title="จัดการโลโก้องค์กร / โครงการ (ซิงค์ตรงกันทุกจุด)"><i class="bi bi-flower1 me-1"></i>เปลี่ยนโลโก้องค์กร</button>
             <button onclick="floraTreeExpandAll()"><i class="bi bi-arrows-expand me-1"></i>ขยายทั้งหมด</button>
             <button onclick="floraTreeCollapseAll()"><i class="bi bi-arrows-collapse me-1"></i>ยุบทั้งหมด</button>
             <button onclick="floraTreeToggleCodes()"><i class="bi bi-${showAdminCodes ? "eye-slash" : "eye"} me-1"></i>${showAdminCodes ? "ซ่อนรหัส" : "แสดงรหัส"}</button>
@@ -357,14 +358,34 @@
   };
   window.openAddModalForTreeNode = nodeId => { const a=assignmentFor(nodeId); if (a) window.openAddModalForSlot?.(a.department,a.position); };
   window.handleTreeOrgDrop = async function(event,nodeId) {
-    event.preventDefault(); event.currentTarget?.classList.remove("drop-target-active");
+    if (event) {
+      event.preventDefault?.(); 
+      event.currentTarget?.classList?.remove("drop-target-active");
+    }
     if(window.requirePersonnelAdmin&&!window.requirePersonnelAdmin("ย้ายบุคลากรในผัง"))return;
-    const empId=event.dataTransfer.getData("text/plain")||window.draggedEmpId, emp=(window.employees||[]).find(e=>(e.id||e.code)===empId), a=assignmentFor(nodeId); if (!emp||!a) return;
+    const empId=(event?.dataTransfer?.getData&&event.dataTransfer.getData("text/plain"))||window.draggedEmpId;
+    window.draggedEmpId = null;
+    const emp=(window.employees||[]).find(e=>(e.id||e.code)===empId), a=assignmentFor(nodeId); 
+    if (!emp||!a) return;
     if (typeof window.ensureFloraLeadershipPositionAvailable === "function" && !window.ensureFloraLeadershipPositionAvailable(empId,a.positionNodeId||"",true)) return;
-    emp.department=a.department; emp.departmentNodeId=a.departmentNodeId; emp.position=a.position; emp.positionNodeId=a.positionNodeId;
+    emp.department=a.department; 
+    emp.departmentNodeId=a.departmentNodeId; 
+    emp.position=a.position; 
+    emp.positionNodeId=a.positionNodeId;
     if (typeof window.getFloraRoleForPositionNode === "function") emp.role=window.getFloraRoleForPositionNode(emp.positionNodeId,emp.positionNodeId?emp.role:"WORKER");
     emp.updatedAt=new Date().toISOString();
-    await window.persistEmployeeChanges?.(emp); window.renderOrgChart?.(); window.renderUnassignedDrawer?.();
+    
+    // Instant UI refresh
+    window.orgChartDirty = true;
+    if (typeof window.syncToLocalStorage === 'function') window.syncToLocalStorage();
+    window.renderOrgChart?.(true); 
+    window.renderUnassignedDrawer?.();
+    if (typeof window.showToast === 'function') {
+      window.showToast(`🎯 โยกย้าย [${emp.code || emp.id}] ${emp.name} ไปยัง "${a.department}" สำเร็จ!`);
+    }
+
+    // Persist in background
+    await window.persistEmployeeChanges?.(emp);
   };
   window.getFloraOrgDepartments = getDepartments;
   window.getFloraOrgAssignment = assignmentFor;
@@ -395,7 +416,7 @@
     document.getElementById("tabTreeManager")?.classList.toggle("active", treeMode);
     document.getElementById("tabPersonnelAttendance")?.classList.toggle("active", attendanceMode);
 
-    const chartElementIds = ["orgQuickActions", "orgToolbar", "canvasWrapper", "zoomControls", "floatingUnassignedBtn"];
+    const chartElementIds = ["orgToolbar", "canvasWrapper", "zoomControls", "floatingUnassignedBtn"];
     chartElementIds.forEach(id => {
       const el = document.getElementById(id);
       if (el) {
@@ -436,8 +457,11 @@
     } else if (directoryMode) {
       window.renderPersonnelDirectory?.();
     } else {
-      window.switchView?.("hierarchy");
-      setTimeout(() => window.fitToWidth?.(), 80);
+      if (typeof window.onSwitchToOrgChart === "function") {
+        window.onSwitchToOrgChart();
+      } else {
+        window.switchView?.("hierarchy");
+      }
     }
   };
   window.connectOrgTreeFirestore = function(api) {
